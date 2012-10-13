@@ -30,7 +30,7 @@ setup(
     long_description=open('README.md').read(),
 
     requires = ['python (>= 2.5)'],
-    install_required = [
+    install_requires = [
         'Django==1.4.1',
         'python-dateutil==2.1'
     ],
