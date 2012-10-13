@@ -29,7 +29,11 @@ setup(
     description='Two Table model for Django for storing other model data.',
     long_description=open('README.md').read(),
 
-    requires = ['python (>= 2.5)', 'django (>= 1.2)', 'python-dateutil (>= 2.1)'],
+    requires = ['python (>= 2.5)'],
+    install_required = [
+        'Django==1.4.1',
+        'python-dateutil==2.1'
+    ],
 
     classifiers  = [
         'Development Status :: 2 - Pre-Alpha',
