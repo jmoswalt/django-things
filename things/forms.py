@@ -24,6 +24,17 @@ class ThingForm(forms.ModelForm):
                 if attr:
                     self.fields[f['key']].initial = attr
 
+    def clean_slug(self):
+        slug = self.cleaned_data.get('slug')
+        if slug.startswith('/'):
+            slug = slug[1:]
+        if slug.endswith('/'):
+            slug = slug[:-1]
+        if not slug:
+            raise forms.ValidationError("The slug can't only contain /'s.")
+
+        return slug
+
     def save(self, *args, **kwargs):
         thing = super(ThingForm, self).save(*args, **kwargs)
         thing.values = {}

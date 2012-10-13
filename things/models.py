@@ -9,7 +9,7 @@ class Thing(models.Model):
 
     name = models.CharField(max_length=200)
     type = models.CharField(max_length=50)
-    slug = models.CharField(max_length=200, unique=True, null=True)
+    slug = models.CharField(max_length=200, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -66,6 +66,6 @@ class Data(models.Model):
     """
 
     thing = models.ForeignKey(Thing, related_name='datum')
-    key = models.CharField(max_length=100)
+    key = models.CharField(max_length=100, db_index=True)
     value = models.TextField()
-    datatype = models.CharField(max_length=50)
+    datatype = models.CharField(max_length=50, db_index=True)
