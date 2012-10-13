@@ -1,10 +1,8 @@
 from django.contrib import admin
 
-from things.models import Page
-from things.forms import PageForm
-
 
 class ThingAdmin(admin.ModelAdmin):
+    prepopulated_fields = {'slug': ['name']}
 
     def content(self, obj):
         return obj.content
@@ -12,11 +10,11 @@ class ThingAdmin(admin.ModelAdmin):
     def author(self, obj):
         return obj.author
 
-
-class PageAdmin(ThingAdmin):
-    form = PageForm
-    list_display = ['name', 'content', 'create_dt']
-    fields = ['name', 'content']
-
-
-admin.site.register(Page, PageAdmin)
+    def view_on_site(self, obj):
+        link = '<a href="%s" title="View - %s" target="_blank">View</a>' % (
+            obj.get_absolute_url(),
+            obj,
+        )
+        return link
+    view_on_site.allow_tags = True
+    view_on_site.short_description = 'view'

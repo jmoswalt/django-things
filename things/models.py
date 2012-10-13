@@ -5,22 +5,23 @@ from things.types import *
 
 
 class Thing(models.Model):
-    """A Thing is simply a name and an object type."""
+    """A Thing is simply a name, slug, and an object type."""
 
     name = models.CharField(max_length=200)
     type = models.CharField(max_length=50)
-    create_dt = models.DateTimeField(auto_now_add=True)
-    update_dt = models.DateTimeField(auto_now=True)
+    slug = models.CharField(max_length=200, unique=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __init__(self, *args, **kwargs):
         super(Thing, self).__init__(*args, **kwargs)
         for f in self.attrs():
-            val = self.get_value_of_attribute(f['slug'])
+            val = self.get_value_of_attribute(f['key'])
 
             if f['datatype'] == TYPE_DATE and val:
                 val = parse(val)  # 2012-10-13 12:34:55-05:00
 
-            setattr(self, f['slug'], val)
+            setattr(self, f['key'], val)
 
     def attrs(self):
         return ""
@@ -36,10 +37,9 @@ class Thing(models.Model):
         super(Thing, self).save(*args, **kwargs)
         values = self.values
         for f in self.attrs():
-            key = f['slug']
+            key = f['key']
             value = values[key]
             datatype = f['datatype']
-            print key, value
             try:
                 data = Data.objects.get(thing=self, key=key)
                 data.value = value
@@ -69,30 +69,3 @@ class Data(models.Model):
     key = models.CharField(max_length=100)
     value = models.TextField()
     datatype = models.CharField(max_length=50)
-
-
-PAGE_ATTRIBUTES = (
-    {"name": "Content",
-    "slug": "content",
-    "description": "The main content of the ariticle.",
-    "datatype": TYPE_TEXT},
-    )
-
-
-class PageManager(models.Manager):
-    def get_query_set(self):
-        return super(PageManager, self).get_query_set().filter(type="page")
-
-
-class Page(Thing):
-    objects = PageManager()
-
-    class Meta:
-        proxy = True
-
-    def save(self, *args, **kwargs):
-        self.type = "page"
-        super(Page, self).save(*args, **kwargs)
-
-    def attrs(self):
-        return PAGE_ATTRIBUTES
