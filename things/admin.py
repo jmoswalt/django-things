@@ -10,11 +10,11 @@ class ThingAdmin(admin.ModelAdmin):
     def author(self, obj):
         return obj.author
 
-    def view_on_site(self, obj):
-        link = '<a href="%s" title="View - %s" target="_blank">View</a>' % (
+    def link(self, obj):
+        link = '<a href="%s" title="View - %s" target="_blank">%s</a>' % (
             obj.get_absolute_url(),
             obj,
+            obj.slug,
         )
         return link
-    view_on_site.allow_tags = True
-    view_on_site.short_description = 'view'
+    link.allow_tags = True
