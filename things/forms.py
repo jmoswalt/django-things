@@ -5,6 +5,9 @@ class ThingForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(ThingForm, self).__init__(*args, **kwargs)
+        if "obj_type" in self.fields:
+            self.fields['obj_type'].widget.attrs['hidden'] = True
+            self.fields['obj_type'].initial = self.Meta.model.clstype()
         for f in self.instance.attrs():
 
             key = f['key']
@@ -32,6 +35,8 @@ class ThingForm(forms.ModelForm):
             slug = slug[:-1]
         if not slug:
             raise forms.ValidationError("The slug can't only contain /'s.")
+
+        slug = slug.replace(" ", "-")
 
         return slug
 
