@@ -4,6 +4,7 @@ from django.utils.encoding import iri_to_uri
 
 class ThingAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ['name']}
+    search_fields = ['name', 'slug']
 
     def content(self, obj):
         return obj.content
