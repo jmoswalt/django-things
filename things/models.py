@@ -1,12 +1,14 @@
 from dateutil.parser import parse
 
+from django.contrib.contenttypes.models import ContentType
 from django.db import models
+from django.core.urlresolvers import reverse
 from things.types import *
 
 
 class ThingManager(models.Manager):
     def get_query_set(self):
-        return super(ThingManager, self).get_query_set().filter(obj_type=self.model.clstype())
+        return super(ThingManager, self).get_query_set().filter(content_type_id=self.model.content_type().pk)
 
     def filter(self, *args, **kwargs):
         new_kwargs = {}
@@ -32,7 +34,7 @@ class Thing(models.Model):
 
     name = models.CharField(max_length=200)
     slug = models.CharField(max_length=200, unique=True)
-    obj_type = models.CharField(max_length=50)
+    content_type_id = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -59,8 +61,10 @@ class Thing(models.Model):
         return ""
 
     @classmethod
-    def clstype(cls):
-        return "thing"
+    def content_type(cls):
+        # Waiting on Django 1.5 support for
+        # return ContentType.objects.get_for_model(cls, for_concrete_model=False)
+        return ContentType.objects.get_for_model(cls)
 
     def get_value_of_attribute(self, attr):
         try:
@@ -71,8 +75,17 @@ class Thing(models.Model):
             # all Data objects as strings
             return ''
 
+    @models.permalink
+    def get_absolute_url(self):
+        return ("%s_detail" % self.content_type().name, [self.slug])
+
+    def get_edit_url(self):
+        ct = self.content_type()
+        url = "admin:%s_%s_change" % (ct.app_label, ct.name)
+        return reverse(url, args=[self.pk])
+
     def save(self, *args, **kwargs):
-        self.obj_type = self.clstype()
+        self.content_type_id = self.content_type().pk
         super(Thing, self).save(*args, **kwargs)
         values = self.values
         for f in self.attrs():

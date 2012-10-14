@@ -1,4 +1,5 @@
 from django import forms
+from django.contrib.contenttypes.models import ContentType
 
 
 class ThingForm(forms.ModelForm):
@@ -8,6 +9,10 @@ class ThingForm(forms.ModelForm):
         if "obj_type" in self.fields:
             self.fields['obj_type'].widget.attrs['hidden'] = True
             self.fields['obj_type'].initial = self.Meta.model.clstype()
+        if "content_type_id" in self.fields:
+            self.fields['content_type_id'].widget.attrs['hidden'] = True
+            self.fields['content_type_id'].widget.attrs['readonly'] = True
+            self.fields['content_type_id'].initial = ContentType.objects.get_for_model(self.Meta.model).pk
         for f in self.instance.attrs():
 
             key = f['key']
