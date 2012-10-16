@@ -1,36 +1,64 @@
 from django import forms
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.admin.widgets import AdminSplitDateTime
+
+from things.types import *
 
 
 class ThingForm(forms.ModelForm):
 
+    class Meta:
+        exclude = ["content_type_id"]
+
     def __init__(self, *args, **kwargs):
         super(ThingForm, self).__init__(*args, **kwargs)
-        if "obj_type" in self.fields:
-            self.fields['obj_type'].widget.attrs['hidden'] = True
-            self.fields['obj_type'].initial = self.Meta.model.clstype()
         if "content_type_id" in self.fields:
-            self.fields['content_type_id'].widget.attrs['hidden'] = True
-            self.fields['content_type_id'].widget.attrs['readonly'] = True
-            self.fields['content_type_id'].initial = ContentType.objects.get_for_model(self.Meta.model).pk
+            # Get rid of the content_type_id field
+            del self.fields['content_type_id']
+
         for f in self.instance.attrs():
 
             key = f['key']
-            if key in self.fields:
-                # Set the label
-                self.fields[f['key']].label = f['name']
+            if key not in self.fields:
+                # Add the field to the form
+                if "form_field" in f:
+                    self.fields[key] = f['form_field']
+                else:
+                    if f['datatype'] == TYPE_BOOLEAN:
+                        self.fields[key] = forms.BooleanField(required=False)
+                    elif f['datatype'] == TYPE_DATE:
+                        self.fields[key] = forms.DateTimeField(widget=AdminSplitDateTime)
+                    else:
+                        self.fields[key] = forms.CharField(required=False)
 
-                # Populate help text if it's defined.
+            # Set the label
+            if "name" in f:
+                self.fields[key].label = f['name']
+            else:
+                self.fields[key].label = f['key']
+
+            # Set the required status
+            if "required" in f:
+                self.fields[key].required = f['required']
+            else:
+                self.fields[key].required = False
+
+            # Set the widget if it's defined
+            if "form_widget" in f:
+                self.fields[key].widget = f['form_widget']
+
+            # Populate help text if it's defined
+            if not self.fields[key].help_text:
                 if "help_text" in f:
-                    self.fields[f['key']].help_text = f['help_text']
+                    self.fields[key].help_text = f['help_text']
                 elif "description" in f:
-                    self.fields[f['key']].help_text = f['description']
+                    self.fields[key].help_text = f['description']
 
-                # Grab the attribute and try to prepopulte the initial
-                # if there is a value.
-                attr = getattr(self.instance, f['key'])
-                if attr:
-                    self.fields[f['key']].initial = attr
+            # Grab the attribute and try to prepopulte the initial
+            # if there is a value.
+            attr = getattr(self.instance, key)
+            if attr:
+                self.fields[key].initial = attr
 
     def clean_slug(self):
         slug = self.cleaned_data.get('slug')
