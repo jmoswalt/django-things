@@ -1,5 +1,4 @@
 from django import forms
-from django.contrib.contenttypes.models import ContentType
 from django.contrib.admin.widgets import AdminSplitDateTime
 
 from things.types import *
@@ -16,7 +15,7 @@ class ThingForm(forms.ModelForm):
             # Get rid of the content_type_id field
             del self.fields['content_type_id']
 
-        for f in self.instance.attrs():
+        for f in self.instance.attrs:
 
             key = f['key']
             if key not in self.fields:
@@ -46,6 +45,8 @@ class ThingForm(forms.ModelForm):
             # Set the widget if it's defined
             if "form_widget" in f:
                 self.fields[key].widget = f['form_widget']
+            elif f['datatype'] == TYPE_LONGTEXT:
+                self.fields[key].widget = forms.Textarea()
 
             # Populate help text if it's defined
             if not self.fields[key].help_text:
@@ -76,7 +77,7 @@ class ThingForm(forms.ModelForm):
     def save(self, *args, **kwargs):
         thing = super(ThingForm, self).save(*args, **kwargs)
         thing.values = {}
-        for f in self.instance.attrs():
+        for f in self.instance.attrs:
             key = f['key']
             thing.values[key] = ''
             if key in self.cleaned_data and self.cleaned_data[key]:

@@ -4,6 +4,8 @@ from django.utils.encoding import iri_to_uri
 from django.utils.safestring import mark_safe
 from django.utils.text import truncate_words
 
+from things.types import *
+
 
 class ThingListFilter(SimpleListFilter):
     title = "Name"
@@ -11,10 +13,13 @@ class ThingListFilter(SimpleListFilter):
 
     def lookups(self, request, model_admin):
         result = []
-        qs = model_admin.model.objects.filter(datum__key=self.parameter_name).values('datum__value').order_by('datum__value').distinct()
+        qs = model_admin.model.objects.filter(datum__key=self.parameter_name).values('datum__value', 'datum__datatype').order_by('datum__value').distinct()
         for q in qs:
             if not q['datum__value']:
-                result.append((q['datum__value'], "(empty)"))
+                if q['datum__datatype'] == TYPE_BOOLEAN:
+                    result.append((q['datum__value'], "False"))
+                else:
+                    result.append((q['datum__value'], "(empty)"))
             else:
                 result.append((q['datum__value'], q['datum__value']))
         return tuple(result)
