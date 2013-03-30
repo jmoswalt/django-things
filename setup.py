@@ -15,27 +15,23 @@
 #
 #    You should have received a copy of the GNU Lesser General Public License
 #    along with Django-things.  If not, see <http://gnu.org/licenses/>.
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name='django-things',
     version=__import__('things').__version__,
-    license = 'GNU Lesser General Public License (LGPL), Version 3',
+    license='GNU Lesser General Public License (LGPL), Version 3',
     url='https://github.com/jmoswalt/django-things',
-
-    packages=['things'],
-    provides = ['things'],
-
+    include_package_data=True,
+    packages=find_packages(),
     description='Two Table model for Django for storing other model data.',
     long_description=open('README.md').read(),
-
-    requires = ['python (>= 2.6)'],
-    install_requires = [
+    requires=['python (>= 2.6)'],
+    install_requires=[
         'Django==1.5',
         'python-dateutil==2.1'
     ],
-
-    classifiers  = [
+    classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Environment :: Web Environment',
         'Framework :: Django',
