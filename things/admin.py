@@ -30,6 +30,16 @@ class ThingListFilter(SimpleListFilter):
         return queryset
 
 
+class AuthorListFilter(ThingListFilter):
+    title = "Author"
+    parameter_name = 'author'
+
+
+class PrivateListFilter(ThingListFilter):
+    title = "Is Private"
+    parameter_name = 'private'
+
+
 class ThingAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ['name']}
     search_fields = ['name', 'slug']

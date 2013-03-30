@@ -53,7 +53,11 @@ class ThingForm(forms.ModelForm):
                 if "help_text" in f:
                     self.fields[key].help_text = f['help_text']
                 elif "description" in f:
-                    self.fields[key].help_text = f['description']
+                    # Auto-create the description if using a shared field
+                    if "{{ model }}" in f['description']:
+                        self.fields[key].help_text = f['description'].replace("{{ model }}", self.instance.obj_type().title())
+                    else:
+                        self.fields[key].help_text = f['description']
 
             # Grab the attribute and try to prepopulte the initial
             # if there is a value.

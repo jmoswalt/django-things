@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+
+{% block title %}Missing Page - 404 Server Error{% endblock title %}
+
+{% block body %}
+        <h2>We can't find that page.</h2>
+        <p>Sorry, but we couldn't find {{ request.path }}</p>
+{% endblock body %}

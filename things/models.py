@@ -3,7 +3,6 @@ from dateutil.parser import parse
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.db.models import Q
-from django.core.urlresolvers import reverse
 from things.types import *
 
 
@@ -12,10 +11,11 @@ class ThingManager(models.Manager):
         return super(ThingManager, self).get_query_set().filter(content_type_id=self.model.content_type().pk)
 
     def filter(self, *args, **kwargs):
-        new_kwargs = {}
         attrs = getattr(self.model, 'attrs')
         if isinstance(attrs, tuple):
+            new_kwarg_list = []
             for f in attrs:
+                new_kwargs = {}
                 key = f['key']
                 for k in kwargs:
                     if key in k:
@@ -27,8 +27,23 @@ class ThingManager(models.Manager):
                         else:
                             mixed_key = 'datum__value%s' % k[len(key):]
                             new_kwargs[mixed_key] = kwargs[k]
-            if 'datum__key' in new_kwargs:
-                kwargs = new_kwargs
+                if new_kwargs:
+                    new_kwarg_list.append(new_kwargs)
+
+            # Make a set of querysets to reduce for
+            # Multiple filters
+            query_sets = []
+            for item in new_kwarg_list:
+                if 'datum__key' in item:
+                    kwargs = item
+                qs = super(ThingManager, self).filter(*args, **kwargs)
+                query_sets.append(qs)
+
+            # If we have filtered querysets, reduce them to their
+            # mixed results
+            if query_sets:
+                return reduce(lambda x, y: x & y, query_sets)
+
         return super(ThingManager, self).filter(*args, **kwargs)
 
     def order_by(self, *args, **kwargs):
@@ -84,7 +99,7 @@ class Thing(models.Model):
         if self.name:
             return self.name
         else:
-            return "%s %s" % (self.obj_type, self.pk)
+            return "%s %s" % (self.obj_type(), self.pk)
 
     @classmethod
     def content_type(cls):
@@ -98,23 +113,14 @@ class Thing(models.Model):
     def attrs_list(cls):
         return [k['key'] for k in cls.attrs]
 
-    def get_value_of_attribute(self, attr):
-        try:
-            data = Data.objects.get(thing=self.id, key=attr)
-            return data.value
-        except Data.DoesNotExist:
-            # return a string since the database is storing
-            # all Data objects as strings
-            return ''
-
     @models.permalink
     def get_absolute_url(self):
         return ("%s_detail" % self.content_type().name, [self.slug])
 
+    @models.permalink
     def get_edit_url(self):
         ct = self.content_type()
-        url = "admin:%s_%s_change" % (ct.app_label, ct.name)
-        return reverse(url, args=[self.pk])
+        return ("admin:%s_%s_change" % (ct.app_label, ct.name), [self.pk])
 
     def save(self, *args, **kwargs):
         self.content_type_id = self.content_type().pk
@@ -136,6 +142,18 @@ class Thing(models.Model):
                     value=value,
                     datatype=datatype
                 )
+
+    def obj_type(self):
+        return self.content_type().name
+
+    def get_value_of_attribute(self, attr):
+        try:
+            data = Data.objects.get(thing=self.id, key=attr)
+            return data.value
+        except Data.DoesNotExist:
+            # return a string since the database is storing
+            # all Data objects as strings
+            return ''
 
 
 def register_thing(cls, attrs, ct=None):
