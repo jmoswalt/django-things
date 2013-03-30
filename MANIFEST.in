@@ -1,0 +1,3 @@
+include README.md
+recursive-include things/static *
+recursive-include things/templates *
