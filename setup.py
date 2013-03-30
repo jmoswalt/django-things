@@ -29,9 +29,9 @@ setup(
     description='Two Table model for Django for storing other model data.',
     long_description=open('README.md').read(),
 
-    requires = ['python (>= 2.5)'],
+    requires = ['python (>= 2.6)'],
     install_requires = [
-        'Django==1.4.1',
+        'Django==1.5',
         'python-dateutil==2.1'
     ],
 

@@ -88,9 +88,7 @@ class Thing(models.Model):
 
     @classmethod
     def content_type(cls):
-        # Waiting on Django 1.5 support for
-        # return ContentType.objects.get_for_model(cls, for_concrete_model=False)
-        return ContentType.objects.get_for_model(cls)
+        return ContentType.objects.get_for_model(cls, for_concrete_model=False)
 
     @classmethod
     def attrs(cls):
