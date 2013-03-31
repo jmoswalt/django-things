@@ -89,7 +89,7 @@ class Thing(models.Model):
 
     def __init__(self, *args, **kwargs):
         super(Thing, self).__init__(*args, **kwargs)
-        if self.attrs:
+        if self.attrs and isinstance(self.attrs, tuple):
             for f in self.attrs:
                 val = self.get_value_of_attribute(f['key'])
 
