@@ -6,6 +6,10 @@ from django.db.models import Q
 from things.types import *
 
 
+class AllThingsManager(models.Manager):
+    pass
+
+
 class ThingManager(models.Manager):
     def get_query_set(self):
         return super(ThingManager, self).get_query_set().filter(content_type_id=self.model.content_type().pk)
@@ -64,7 +68,7 @@ class ThingManager(models.Manager):
                             new_qs.append(Q(datum__key=key))
                             new_args.append("".join([ordering, "datum__value"]))
                 else:
-                    new_args.append(a)
+                    new_args.append("".join([ordering, a]))
         args = new_args
         if new_qs:
             return super(ThingManager, self).filter(*new_qs).order_by(*args, **kwargs)
@@ -81,19 +85,21 @@ class Thing(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     objects = ThingManager()
+    all_things = AllThingsManager()
 
     def __init__(self, *args, **kwargs):
         super(Thing, self).__init__(*args, **kwargs)
-        for f in self.attrs:
-            val = self.get_value_of_attribute(f['key'])
+        if self.attrs:
+            for f in self.attrs:
+                val = self.get_value_of_attribute(f['key'])
 
-            if f['datatype'] == TYPE_DATE and val:
-                val = parse(val)  # 2012-10-13 12:34:55-05:00
+                if f['datatype'] == TYPE_DATE and val:
+                    val = parse(val)  # 2012-10-13 12:34:55-05:00
 
-            if f['datatype'] == TYPE_BOOLEAN:
-                val = bool(val)  # 'True' or ''
+                if f['datatype'] == TYPE_BOOLEAN:
+                    val = bool(val)  # 'True' or ''
 
-            setattr(self, f['key'], val)
+                setattr(self, f['key'], val)
 
     def __unicode__(self):
         if self.name:
@@ -125,23 +131,24 @@ class Thing(models.Model):
     def save(self, *args, **kwargs):
         self.content_type_id = self.content_type().pk
         super(Thing, self).save(*args, **kwargs)
-        values = self.values
-        for f in self.attrs:
-            key = f['key']
-            value = values[key]
-            datatype = f['datatype']
-            try:
-                data = Data.objects.get(thing=self, key=key)
-                data.value = value
-                data.datatype = datatype
-                data.save()
-            except Data.DoesNotExist:
-                Data.objects.create(
-                    thing=self,
-                    key=key,
-                    value=value,
-                    datatype=datatype
-                )
+        values = getattr(self, 'values')
+        if values:
+            for f in self.attrs:
+                key = f['key']
+                value = values[key]
+                datatype = f['datatype']
+                try:
+                    data = Data.objects.get(thing=self, key=key)
+                    data.value = value
+                    data.datatype = datatype
+                    data.save()
+                except Data.DoesNotExist:
+                    Data.objects.create(
+                        thing=self,
+                        key=key,
+                        value=value,
+                        datatype=datatype
+                    )
 
     def obj_type(self):
         return self.content_type().name

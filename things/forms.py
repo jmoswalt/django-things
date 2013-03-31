@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.admin.widgets import AdminSplitDateTime
 
 from things.types import *
+from things.models import Thing
 
 
 class ThingForm(forms.ModelForm):
@@ -73,6 +74,14 @@ class ThingForm(forms.ModelForm):
             slug = slug[:-1]
         if not slug:
             raise forms.ValidationError("The slug can't only contain /'s.")
+        else:
+            if not self.instance.pk:
+                try:
+                    exists = Thing.all_things.get(slug=slug)
+                except TypeError:
+                    raise forms.ValidationError("That slug is already used.")
+                except Thing.DoesNotExist:
+                    pass
 
         slug = slug.replace(" ", "-")
 
