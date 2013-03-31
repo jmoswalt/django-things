@@ -1,1 +1,1 @@
-{% if user.is_superuser %}<a href="{{ object.get_edit_url }}?next={{ request.path }}">edit</a>{% endif %}
+{% if edit_mode %}<a href="{{ object.get_edit_url }}?next={{ request.path }}">edit</a>{% endif %}

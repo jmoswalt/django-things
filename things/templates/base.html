@@ -17,5 +17,21 @@
 <body>
     {% block body %}{% endblock body %}
     {% block js %}{% endblock js %}
+    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-1.8.3.min.js"></script>
+    {% if request.user.is_superuser %}
+    <script type="text/javascript">
+    $(document).ready(function() {
+        $(document).keyup(function(){
+            if ( event.which == 27 ) {
+                {% if edit_mode %}
+                    window.location = "{{ request.path }}?mode=normal";
+                {% else %}
+                    window.location = "{{ request.path }}?mode=edit";
+                {% endif %}
+            }
+        })
+    });
+    </script>
+    {% endif %}
 </body>
 </html>
