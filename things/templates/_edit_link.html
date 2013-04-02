@@ -1,1 +1,1 @@
-{% if edit_mode %}<a href="{{ object.get_edit_url }}?next={{ request.path }}">edit</a>{% endif %}
+{% if edit_mode %}<span><a class="edit-link" style="font-size: 13px; color: #f04;" href="{{ object.get_edit_url }}?next={% firstof request.path '/' %}">edit</a></span>{% endif %}

@@ -1,0 +1,3 @@
+    {% if edit_mode %}
+    <div class="edit-alert alert fade in alert-warning" data-alert="alert">You are in Edit Mode. You may <a href="/admin/">Go to the Admin</a>{% if object %}, <a href="{{ object.get_edit_url }}?next={{ request.path }}">Edit this {{ object.content_type.name|title }}</a>,{% endif %} or <a href="{{ request.path }}?mode=">Leave Edit Mode</a></div>
+    {% endif %}

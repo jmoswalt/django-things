@@ -75,6 +75,11 @@ class ThingAdmin(admin.ModelAdmin):
             result['Location'] = iri_to_uri("%s") % request.GET.get('next')
         return result
 
+    def get_form(self, request, obj=None, **kwargs):
+        form = super(ThingAdmin, self).get_form(request, obj=None, **kwargs)
+        form.user = request.user
+        return form
+
     def render_change_form(self, request, context, add=False, change=False, form_url='', obj=None):
         """
         This is awesome and comes from django-eav

@@ -7,14 +7,13 @@ from things.models import Thing
 
 class ThingForm(forms.ModelForm):
 
-    class Meta:
-        exclude = ["content_type_id"]
-
     def __init__(self, *args, **kwargs):
         super(ThingForm, self).__init__(*args, **kwargs)
         if "content_type_id" in self.fields:
-            # Get rid of the content_type_id field
             del self.fields['content_type_id']
+
+        if "creator" in self.fields:
+            del self.fields['creator']
 
         for f in self.instance.attrs:
 
@@ -89,6 +88,8 @@ class ThingForm(forms.ModelForm):
 
     def save(self, *args, **kwargs):
         thing = super(ThingForm, self).save(*args, **kwargs)
+        if not thing.creator:
+            thing.creator = self.user
         thing.values = {}
         for f in self.instance.attrs:
             key = f['key']

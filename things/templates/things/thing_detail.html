@@ -1,0 +1,14 @@
+{% extends "interior.html" %}
+{% load thing_tags %}
+
+{% block title %}{{ object.name }}{% endblock title %}
+
+{% block content %}
+
+    <h1>{{ object.name }}</h1>
+
+    {% for attr in object.attrs %}
+        <p>{{ attr.name }}: {% thing_attr attr %}</p>
+    {% endfor %}
+
+{% endblock content %}

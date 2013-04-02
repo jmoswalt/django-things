@@ -1,10 +1,11 @@
 from django.views.generic import ListView, DetailView
 from django.shortcuts import get_object_or_404
 
-from things.utils import get_thing_object_or_404
+from .utils import get_thing_object_or_404
+
 
 class ThingDetailView(DetailView):
-    public_filters = {}
+    public_filter_out = {}
 
     def get_object(self, **kwargs):
         super(ThingDetailView, self).get_object(**kwargs)
@@ -20,9 +21,21 @@ class ThingDetailView(DetailView):
 
         return obj
 
+    def get_template_names(self):
+        names = []
+
+        names.append("%s/%s%s.html" % (
+            self.model._meta.app_label,
+            self.model._meta.object_name.lower(),
+            self.template_name_suffix)
+        )
+
+        names.append("things/thing_detail.html")
+        return names
+
 
 class ThingListView(ListView):
-    public_filters = {}
+    public_filter_out = {}
     super_user_order = ['-created_at']
     public_order = ""
 
@@ -31,10 +44,10 @@ class ThingListView(ListView):
         if self.request.user.is_superuser:
             queryset = self.model.objects.order_by(*self.super_user_order)
         else:
-            queryset = self.model.objects.filter(**self.public_filters)
+            queryset = self.model.objects.filter(**self.public_filter_out)
 
             if self.public_order:
-                if self.public_order.replace('-','') in self.model.attrs_list():
+                if self.public_order.replace('-', '') in self.model.attrs_list():
                     if self.public_order[0] == "-":
                         key = self.public_order[1:]
                         value = '-datum__value'
@@ -46,5 +59,16 @@ class ThingListView(ListView):
                 else:
                     queryset = queryset.order_by(self.public_order)
 
-
         return queryset
+
+    def get_template_names(self):
+        names = []
+
+        names.append("%s/%s%s.html" % (
+            self.model._meta.app_label,
+            self.model._meta.object_name.lower(),
+            self.template_name_suffix)
+        )
+
+        names.append("things/thing_list.html")
+        return names

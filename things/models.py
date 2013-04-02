@@ -1,6 +1,7 @@
 from dateutil.parser import parse
 
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import Q
 from things.types import *
@@ -83,6 +84,7 @@ class Thing(models.Model):
     content_type_id = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    creator = models.ForeignKey(User, null=True)
 
     objects = ThingManager()
     all_things = AllThingsManager()

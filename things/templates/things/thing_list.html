@@ -1,0 +1,9 @@
+{% extends "interior.html" %}
+
+{% block title %}{% for i in object_list %}{% if forloop.first %}{{ i.content_type.name|title }}s{% endif %}{% endfor %} List{% endblock title %}
+
+{% block content %}
+    {% for object in object_list %}
+        {% include "things/_thing_list_item.html" %}
+    {% endfor %}
+{% endblock content %}
