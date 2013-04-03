@@ -3,10 +3,14 @@ from dateutil.parser import parse
 
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User
+from django.core.files import File
+from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import models
 from django.db.models import Q
 from django.conf import settings
-from things.types import *
+
+from .types import *
+from .utils import handle_uploaded_file
 
 
 class AllThingsManager(models.Manager):
@@ -105,7 +109,18 @@ class Thing(models.Model):
 
                 if f['datatype'] == TYPE_FILE:
                     if val:
-                        val = os.path.join(settings.MEDIA_URL, val)  # File URL
+                        if val.startswith('/'):
+                            val = val[1:]
+                        try:
+                            full_path = os.path.join(settings.MEDIA_ROOT, val)
+                            with open(full_path, 'r') as fi:
+                                val = File(fi)
+                                val.url = val.name.replace(settings.PROJECT_ROOT, '')
+                                val.name = val.name.replace(settings.MEDIA_ROOT, '')
+                                if val.name.startswith('/'):
+                                    val.name = val.name[1:]
+                        except IOError:
+                            val = ''
 
                 setattr(self, f['key'], val)
 
@@ -146,7 +161,7 @@ class Thing(models.Model):
                 value = values[key]
                 datatype = f['datatype']
                 if datatype == TYPE_FILE:
-                    if not isinstance(value, unicode) and not isinstance(value, str):
+                    if isinstance(value, InMemoryUploadedFile):
                         value = handle_uploaded_file(self, value)
                 try:
                     data = Data.objects.get(thing=self, key=key)
@@ -181,21 +196,6 @@ def register_thing(cls, attrs, ct=None):
     setattr(cls, 'attrs', attrs)
     for a in attrs:
         setattr(cls, a['key'], '')
-
-
-def handle_uploaded_file(obj, f):
-    internal_path = os.path.join("uploads", obj.obj_type_plural(), str(obj.pk))
-    folder_path = os.path.join(settings.MEDIA_ROOT, internal_path)
-    if not os.path.exists(folder_path):
-        os.makedirs(folder_path)
-
-    file_path = os.path.join(internal_path, f.name)
-    full_file_path = os.path.join(settings.MEDIA_ROOT, file_path)
-    with open(full_file_path, 'wb+') as destination:
-        for chunk in f.chunks():
-            destination.write(chunk)
-
-    return file_path
 
 
 class Data(models.Model):

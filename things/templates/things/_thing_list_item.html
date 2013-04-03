@@ -3,7 +3,7 @@
 <h2><a href="{{ object.get_absolute_url }}">{{ object.name }}</a></h2>
 
 {% for attr in object.attrs %}
-    <p>{{ attr.name }}: {% thing_attr attr %}</p>
+    <p class="clearfix">{{ attr.name }}: {% thing_attr attr %}</p>
 {% endfor %}
 
 {% include "_edit_link.html" %}

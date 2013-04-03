@@ -4,8 +4,10 @@ from django.utils.encoding import iri_to_uri
 from django.utils.safestring import mark_safe
 from django.utils.text import truncate_words
 from django.utils.html import strip_tags
+from django.forms.models import ModelForm
 
-from things.types import *
+from .types import *
+from .forms import ThingForm
 
 
 class ThingListFilter(SimpleListFilter):
@@ -51,6 +53,9 @@ class ThingAdmin(admin.ModelAdmin):
         if self.list_display == ('__str__',):
             thing_fields = ['name', 'link']
             self.list_display = thing_fields + self.model.attrs_list() + ['updated_at']
+
+        if self.form == ModelForm:
+            self.form = ThingForm
 
     def link(self, obj):
         """
