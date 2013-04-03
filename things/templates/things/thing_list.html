@@ -1,6 +1,8 @@
 {% extends "interior.html" %}
+{% load i18n %}
 
-{% block title %}{% for i in object_list %}{% if forloop.first %}{{ i.content_type.name|title }}s{% endif %}{% endfor %} List{% endblock title %}
+
+{% block title %}{{ object_type_plural|title }} {% trans "List" %}{% endblock title %}
 
 {% block content %}
     {% for object in object_list %}

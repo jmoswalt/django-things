@@ -155,6 +155,9 @@ class Thing(models.Model):
     def obj_type(self):
         return self.content_type().name
 
+    def obj_type_plural(self):
+        return self._meta.verbose_name_plural
+
     def get_value_of_attribute(self, attr):
         try:
             data = Data.objects.get(thing=self.id, key=attr)
