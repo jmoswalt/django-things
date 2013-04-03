@@ -1,5 +1,11 @@
+import os
+
 from django import forms
 from django.contrib.admin.widgets import AdminSplitDateTime
+from django.core.files.base import ContentFile
+from django.conf import settings
+
+from redactor.widgets import RedactorEditor
 
 from things.types import *
 from things.models import Thing
@@ -27,6 +33,8 @@ class ThingForm(forms.ModelForm):
                         self.fields[key] = forms.BooleanField(required=False)
                     elif f['datatype'] == TYPE_DATE:
                         self.fields[key] = forms.DateTimeField(widget=AdminSplitDateTime)
+                    elif f['datatype'] == TYPE_FILE:
+                        self.fields[key] = forms.FileField(required=False, widget=forms.ClearableFileInput)
                     else:
                         self.fields[key] = forms.CharField(required=False)
 
@@ -46,7 +54,7 @@ class ThingForm(forms.ModelForm):
             if "form_widget" in f:
                 self.fields[key].widget = f['form_widget']
             elif f['datatype'] == TYPE_LONGTEXT:
-                self.fields[key].widget = forms.Textarea()
+                self.fields[key].widget = RedactorEditor()
 
             # Populate help text if it's defined
             if not self.fields[key].help_text:
@@ -63,6 +71,14 @@ class ThingForm(forms.ModelForm):
             # if there is a value.
             attr = getattr(self.instance, key)
             if attr:
+                if f['datatype'] == TYPE_FILE:
+                    # Do something to assign and 'url' attribute
+                    # to the file so the ClearableFileInput works
+                    file_path = attr
+                    full_path = "%s%s" % (settings.PROJECT_ROOT, file_path)
+                    with open(full_path, 'r') as f:
+                        attr = ContentFile(f.read())
+                    attr.url = file_path
                 self.fields[key].initial = attr
 
     def clean_slug(self):

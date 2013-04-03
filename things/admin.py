@@ -3,6 +3,7 @@ from django.contrib.admin import SimpleListFilter
 from django.utils.encoding import iri_to_uri
 from django.utils.safestring import mark_safe
 from django.utils.text import truncate_words
+from django.utils.html import strip_tags
 
 from things.types import *
 
@@ -43,7 +44,13 @@ class PrivateListFilter(ThingListFilter):
 class ThingAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ['name']}
     search_fields = ['name', 'slug']
-    list_display = ['name', 'link', 'updated_at']
+
+    def __init__(self, *args, **kwargs):
+        super(ThingAdmin, self).__init__(*args, **kwargs)
+
+        if self.list_display == ('__str__',):
+            thing_fields = ['name', 'link']
+            self.list_display = thing_fields + self.model.attrs_list() + ['updated_at']
 
     def link(self, obj):
         """
@@ -63,7 +70,7 @@ class ThingAdmin(admin.ModelAdmin):
     # for common field names
     # --------------------------------- #
     def content(self, obj):
-        return truncate_words(obj.content, 15)
+        return truncate_words(strip_tags(obj.content), 15)
 
     def change_view(self, request, object_id, form_url='', extra_context=None):
         """
