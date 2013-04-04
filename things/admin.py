@@ -46,6 +46,7 @@ class PrivateListFilter(ThingListFilter):
 class ThingAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ['name']}
     search_fields = ['name', 'slug']
+    list_filter = ['updated_at', 'created_at']
 
     def __init__(self, *args, **kwargs):
         super(ThingAdmin, self).__init__(*args, **kwargs)
@@ -72,11 +73,29 @@ class ThingAdmin(admin.ModelAdmin):
 
     # --------------------------------- #
     # HELPER METHODS
-    # for common field names
+    # for fields in things.attrs
     # --------------------------------- #
     def content(self, obj):
         return truncate_words(strip_tags(obj.content), 15)
 
+    def private(self, obj):
+        return obj.private
+    private.boolean = True
+
+    def featured(self, obj):
+        return obj.featured
+    featured.boolean = True
+
+    def image(self, obj):
+        if obj.image:
+            return '<a href="%s" target="_blank">%s</a>' % (obj.image.url, obj.image.name)
+        return ""
+    image.allow_tags = True
+
+    # --------------------------------- #
+    # DEFAULT METHODS
+    # for rendering the form
+    # --------------------------------- #
     def change_view(self, request, object_id, form_url='', extra_context=None):
         """
         Update the change_view to respect the next querystring
