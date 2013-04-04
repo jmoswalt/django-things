@@ -35,3 +35,10 @@ PUBLISHED_AT = {
     "description": "The publish date of the {{ model }}.",
     "datatype": TYPE_DATE
 }
+
+IMAGE = {
+    "name": "Image",
+    "key": "image",
+    "description": "Add an image to the {{ model }}.",
+    "datatype": TYPE_FILE
+}

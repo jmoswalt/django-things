@@ -31,6 +31,9 @@ class ThingForm(forms.ModelForm):
                         self.fields[key] = forms.DateTimeField(widget=AdminSplitDateTime)
                     elif f['datatype'] == TYPE_FILE:
                         self.fields[key] = forms.FileField(required=False, widget=forms.ClearableFileInput)
+                    elif f['datatype'] == TYPE_FOREIGNKEY:
+                        choices = [(i.pk, i.name) for i in f['model'].objects.all()]
+                        self.fields[key] = forms.ChoiceField(required=False, choices=choices)
                     else:
                         self.fields[key] = forms.CharField(required=False)
 
@@ -45,6 +48,11 @@ class ThingForm(forms.ModelForm):
                 self.fields[key].required = f['required']
             else:
                 self.fields[key].required = False
+
+            # Set the disabled status
+            if "editable" in f:
+                if not f['editable']:
+                    self.fields[key].widget.attrs['disabled'] = 'disabled'
 
             # Set the widget if it's defined
             if "form_widget" in f:
@@ -67,6 +75,8 @@ class ThingForm(forms.ModelForm):
             # if there is a value.
             attr = getattr(self.instance, key)
             if attr:
+                if f['datatype'] == TYPE_FOREIGNKEY:
+                    attr = attr.pk
                 self.fields[key].initial = attr
 
     def clean_slug(self):
@@ -81,12 +91,18 @@ class ThingForm(forms.ModelForm):
             if not self.instance.pk:
                 try:
                     exists = Thing.all_things.get(slug=slug)
-                except TypeError:
-                    raise forms.ValidationError("That slug is already used.")
                 except Thing.DoesNotExist:
-                    pass
+                    exists = False
+            else:
+                try:
+                    exists = Thing.all_things.exclude(pk=self.instance.pk).get(slug=slug)
+                except Thing.DoesNotExist:
+                    exists = False
 
-        slug = slug.replace(" ", "-")
+            if exists:
+                raise forms.ValidationError("That slug is already used.")
+
+        slug = slug.replace(" ", "-").lower()
 
         return slug
 
@@ -98,6 +114,11 @@ class ThingForm(forms.ModelForm):
         for f in self.instance.attrs:
             key = f['key']
             thing.values[key] = ''
+
+            if 'editable' in f:
+                if not f['editable']:
+                    self.cleaned_data[key] = thing.get_value_of_attribute(f['key'])
+
             if key in self.cleaned_data and self.cleaned_data[key]:
                 thing.values[key] = self.cleaned_data[key]
         return thing

@@ -19,7 +19,7 @@ def get_thing_object_or_404(cls, slug, **kwargs):
 
 
 def handle_uploaded_file(obj, f):
-    internal_path = os.path.join(unicode("uploads"), unicode(obj.obj_type_plural()), unicode(obj.pk))
+    internal_path = os.path.join(unicode("uploads"), unicode(obj.obj_type_plural().replace(' ', '_')), unicode(obj.pk))
     folder_path = os.path.join(settings.MEDIA_ROOT, internal_path)
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)

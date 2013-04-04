@@ -107,6 +107,10 @@ class Thing(models.Model):
                 if f['datatype'] == TYPE_BOOLEAN:
                     val = bool(val)  # 'True' or ''
 
+                if f['datatype'] == TYPE_FOREIGNKEY:
+                    fk_model = f['model']
+                    val = fk_model.objects.get(pk=val)  # Foreign Object
+
                 if f['datatype'] == TYPE_FILE:
                     if val:
                         if val.startswith('/'):
@@ -144,7 +148,7 @@ class Thing(models.Model):
 
     @models.permalink
     def get_absolute_url(self):
-        return ("%s_detail" % self.content_type().name, [self.slug])
+        return ("%s_detail" % self.content_type().name.replace(' ', '_'), [self.slug])
 
     @models.permalink
     def get_edit_url(self):
