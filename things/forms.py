@@ -80,7 +80,8 @@ class ThingForm(forms.ModelForm):
                 self.fields[key].initial = attr
 
     def clean_slug(self):
-        slug = self.cleaned_data.get('slug')
+        slug = self.cleaned_data['slug']
+
         if slug.startswith('/'):
             slug = slug[1:]
         if slug.endswith('/'):
