@@ -1,11 +1,10 @@
 import os
 import re
 
-from johnny.cache import enable
+from django.core.cache import cache
 
 
 def load_theme_snippets(theme_path):
-    enable()
     from .models import Snippet
 
     for root, dirs, files in os.walk(os.path.join(theme_path, 'templates')):
@@ -39,5 +38,6 @@ def load_theme_snippets(theme_path):
                             new_snippet.slug = slug
                             new_snippet.values = {'content': snippet_value, 'allow_html': allow_html}
                             new_snippet.save()
+                            cache.clear()
                         except Exception as e:
                             print e
