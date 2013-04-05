@@ -2,6 +2,7 @@ import os
 
 from django.http import Http404
 from django.conf import settings
+from django.shortcuts import get_object_or_404
 
 
 def get_thing_object_or_404(cls, slug, **kwargs):
@@ -31,3 +32,45 @@ def handle_uploaded_file(obj, f):
             destination.write(chunk)
 
     return file_path
+
+
+def get_thing_objects_qs(model, user):
+    public_filter_out = model.public_filter_out or {}
+    super_user_order = model.super_user_order or ['-created_at']
+    public_order = model.public_order or ""
+
+    if user.is_superuser:
+        queryset = model.objects.order_by(*super_user_order)
+    else:
+        queryset = model.objects.filter(**public_filter_out)
+
+        if public_order:
+            if public_order.replace('-', '') in model.attrs_list():
+                if public_order[0] == "-":
+                    key = public_order[1:]
+                    value = '-datum__value'
+                else:
+                    key = public_order
+                    value = 'datum_value'
+
+                queryset = queryset.filter(datum__key=key).order_by(value)
+            else:
+                queryset = queryset.order_by(public_order)
+
+    return queryset
+
+
+def get_thing_object(model, user, slug):
+    public_filter_out = model.public_filter_out or {}
+
+    if user.is_superuser:
+        obj = get_object_or_404(model, slug=slug)
+
+    else:
+        filters = public_filter_out
+        obj = get_thing_object_or_404(
+            cls=model,
+            slug=slug,
+            **filters)
+
+    return obj

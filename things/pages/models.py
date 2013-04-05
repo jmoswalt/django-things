@@ -1,5 +1,4 @@
-from things.models import Thing, register_thing
-from things import attrs
+from things import attrs, models
 
 
 PAGE_ATTRIBUTES = (
@@ -8,10 +7,11 @@ PAGE_ATTRIBUTES = (
 )
 
 
-class Page(Thing):
+class Page(models.Thing):
+    public_filter_out = {'private': ""}
 
     class Meta:
         proxy = True
 
 
-register_thing(Page, PAGE_ATTRIBUTES)
+models.register_thing(Page, PAGE_ATTRIBUTES)
