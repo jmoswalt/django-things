@@ -1,11 +1,18 @@
 {% extends "interior.html" %}
 {% load i18n %}
+{% load pagination_tags %}
 
 
 {% block title %}{{ object_type_plural|title }} {% trans "List" %}{% endblock title %}
 
 {% block content %}
+
+    {% autopaginate object_list 20 %}
+
     {% for object in object_list %}
         {% include "things/_thing_list_item.html" %}
     {% endfor %}
+
+    {% paginate %}
+
 {% endblock content %}
