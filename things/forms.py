@@ -12,7 +12,11 @@ class ThingForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(ThingForm, self).__init__(*args, **kwargs)
         if "content_type_id" in self.fields:
-            del self.fields['content_type_id']
+            if not self.instance.pk:
+                del self.fields['content_type_id']
+            else:
+                choices = [(i.content_type().pk, i.content_type().name.title()) for i in Thing.__subclasses__()]
+                self.fields['content_type_id'] = forms.ChoiceField(required=True, choices=choices, label="Thing Type", initial=self.instance.content_type().pk)
 
         if "creator" in self.fields:
             del self.fields['creator']
@@ -109,6 +113,8 @@ class ThingForm(forms.ModelForm):
 
     def save(self, *args, **kwargs):
         thing = super(ThingForm, self).save(*args, **kwargs)
+        if 'content_type_id' in self.cleaned_data:
+            thing.content_type_id = self.cleaned_data['content_type_id']
         if not thing.creator:
             thing.creator = self.user
         thing.values = {}

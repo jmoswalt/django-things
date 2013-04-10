@@ -47,6 +47,7 @@ class ThingAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ['name']}
     search_fields = ['name', 'slug']
     list_filter = ['updated_at', 'created_at']
+    list_per_page = 30
 
     def __init__(self, *args, **kwargs):
         super(ThingAdmin, self).__init__(*args, **kwargs)

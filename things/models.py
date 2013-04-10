@@ -156,7 +156,8 @@ class Thing(models.Model):
         return ("admin:%s_%s_change" % (ct.app_label, ct.name), [self.pk])
 
     def save(self, *args, **kwargs):
-        self.content_type_id = self.content_type().pk
+        if not self.content_type_id:
+            self.content_type_id = self.content_type().pk
         super(Thing, self).save(*args, **kwargs)
         values = getattr(self, 'values')
         if values:
