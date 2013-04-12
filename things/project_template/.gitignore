@@ -5,7 +5,7 @@
 *.pyc
 
 # Ignore the virtualenv
-/venv/
+/venv*
 
 # Ignore collectstatic dir
 /static/
@@ -15,9 +15,3 @@
 !/.env_example
 
 /media/*
-/apps/*
-
-!/apps/articles/
-!/apps/journals/
-!/apps/links/
-!/apps/posts/
