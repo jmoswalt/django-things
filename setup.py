@@ -32,10 +32,10 @@ setup(
             create-things-project=things.bin.create_things_project:create_project
         """,
     dependency_links=[
-        "https://github.com/mtigas/django-medusa/master#egg=django_medusa-0.1.0",
+        "https://github.com/mtigas/django-medusa/tarball/master#egg=django_medusa-0.1.0",
     ],
     install_requires=[
-        'Django==1.5',
+        'Django==1.5.1',
         'python-dateutil==2.1',
         'django-medusa',
         'django-wysiwyg-redactor==0.3.1',
