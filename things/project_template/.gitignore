@@ -1,0 +1,23 @@
+# Ignore all dotfiles...
+.*
+
+# Ignore all pyc file
+*.pyc
+
+# Ignore the virtualenv
+/venv/
+
+# Ignore collectstatic dir
+/static/
+
+# except for .gitignore
+!/.gitignore
+!/.env_example
+
+/media/*
+/apps/*
+
+!/apps/articles/
+!/apps/journals/
+!/apps/links/
+!/apps/posts/

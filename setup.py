@@ -24,12 +24,23 @@ setup(
     url='https://github.com/jmoswalt/django-things',
     include_package_data=True,
     packages=find_packages(),
-    description='Two Table model for Django for storing other model data.',
+    description='Two Table model for Django for storing other model data. With things, you can create a django project and generate a static site from your database content.',
     long_description=open('README.md').read(),
     requires=['python (>= 2.6)'],
+    entry_points="""
+            [console_scripts]
+            create-things-project=things.bin.create_things_project:create_project
+        """,
+    dependency_links=[
+        "https://github.com/mtigas/django-medusa/master#egg=django_medusa-0.1.0",
+    ],
     install_requires=[
         'Django==1.5',
-        'python-dateutil==2.1'
+        'python-dateutil==2.1',
+        'django-medusa',
+        'django-wysiwyg-redactor==0.3.1',
+        'django-pagination==1.0.7',
+        'django-storages==1.1.5',
     ],
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
@@ -39,6 +50,7 @@ setup(
         'License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)',
         'Programming Language :: Python',
         'Topic :: Database',
-        'Topic :: Software Development :: Libraries :: Python Modules',
+        'Topic :: Internet :: WWW/HTTP',
+        'Topic :: Internet :: WWW/HTTP :: WSGI :: Application',
     ],
 )

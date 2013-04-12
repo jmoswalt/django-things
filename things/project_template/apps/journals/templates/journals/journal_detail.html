@@ -1,0 +1,12 @@
+{% extends "interior.html" %}
+
+{% block title %}{{ object.name }} by {{ object.author }}{% endblock title %}
+
+{% block content %}
+    <h1>{{ object.name }}</h1>
+    <p>By: {{ object.author }}</p>
+    <p>Category: {{ object.category }}</p>
+    <p>{{ object.content|safe }}</p>
+    <p>Published at: {{ object.published_at|date:"m/d/Y h:i a" }}</p>
+    <p><a href="{% url 'journal_list' %}">All Journals</a></p>
+{% endblock content %}

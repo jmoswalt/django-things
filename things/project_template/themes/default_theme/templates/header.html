@@ -1,0 +1,27 @@
+{% load snippet_tags %}
+
+<div class="container">
+
+    <header class="row">
+
+        <div class="span9">
+            <h1>
+                <a href="/">{% snippet 'sitename' striptags %}Sitename{% endsnippet %}</a>
+            </h1>
+            <span>{% snippet 'subtitle' striptags %}Nice subtitle here{% endsnippet %}</span>
+        </div> <!-- /.span8 -->
+
+        <div id="main-navigation" class="span3">
+            {% snippet 'main-navigation' %}
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/articles/">Articles</a></li>
+                <li><a href="/journals/">Journals</a></li>
+                <li><a href="/links/">Links</a></li>
+            </ul>
+            {% endsnippet %}
+        </div> <!-- /.span4 -->
+
+    </header> <!-- /.row -->
+
+</div> <!-- /.container -->

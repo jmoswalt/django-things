@@ -95,6 +95,8 @@ class Thing(models.Model):
     objects = ThingManager()
     all_things = AllThingsManager()
 
+    public_filter_out = {}
+
     def __init__(self, *args, **kwargs):
         super(Thing, self).__init__(*args, **kwargs)
         if self.attrs and isinstance(self.attrs, tuple):
@@ -102,7 +104,10 @@ class Thing(models.Model):
                 val = self.get_value_of_attribute(f['key'])
 
                 if f['datatype'] == TYPE_DATE and val:
-                    val = parse(val)  # 2012-10-13 12:34:55-05:00
+                    try:
+                        val = parse(val)  # 2012-10-13 12:34:55-05:00
+                    except ValueError:
+                        val = val
 
                 if f['datatype'] == TYPE_BOOLEAN:
                     val = bool(val)  # 'True' or ''

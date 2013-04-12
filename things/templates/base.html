@@ -1,3 +1,6 @@
+{% load snippet_tags %}
+
+
 {% block doctype %}<!DOCTYPE html>{% endblock doctype %}
 {% block html_open %}<html lang="en">{% endblock html_open %}
 <head>
@@ -20,11 +23,23 @@
 
     {% block head %}{% endblock head %}
 
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', '{% snippet "google-analytics-ua" striptags %}{% endsnippet %}']);
+      _gaq.push(['_trackPageview']);
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
 </head>
 
 <body>
 
     {% include "_edit_bar.html" %}
+
+    {% include "_messages.html" %}
 
     {% block body %}{% endblock body %}
 
@@ -32,23 +47,32 @@
     <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-1.8.3.min.js"></script>
     {% endblock jquery %}
 
+    {% if request.user.is_superuser %}
     <script type="text/javascript">
     $(document).ready(function() {
         $(document).keyup(function(){
             if ( event.which == 27 ) {
-                {% if request.user.is_superuser %}
-                    {% if edit_mode %}
-                        window.location = "{{ request.path }}?mode=";
-                    {% else %}
-                        window.location = "{{ request.path }}?mode=edit";
-                    {% endif %}
+                {% if edit_mode %}
+                    window.location = "{{ request.path }}?mode=";
                 {% else %}
-                    window.location = "/admin/";
+                    window.location = "{{ request.path }}?mode=edit";
                 {% endif %}
             }
         })
     });
     </script>
+    {% endif %}
+
+    {% if messages %}
+    <script type="text/javascript">
+    $(document).ready(function() {
+        var alerts = $(".alert-success").parent();
+        if (alerts) {
+            alerts.delay(3000).fadeOut(1000, function () { $(this).remove(); });
+        }
+    });
+    </script>
+    {% endif %}
 
     {% block js %}{% endblock js %}
 

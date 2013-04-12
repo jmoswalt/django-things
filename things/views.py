@@ -1,4 +1,9 @@
+import subprocess
+
 from django.views.generic import ListView, DetailView
+from django.http import HttpResponseRedirect
+from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib import messages
 
 from .utils import get_thing_object, get_thing_objects_qs
 
@@ -57,3 +62,11 @@ class ThingListView(ListView):
         context['extend_things'] = self.default_template_name
 
         return context
+
+
+@staff_member_required
+def static_build(request):
+    subprocess.Popen(["python", "manage.py", "rebuild_static_site"])
+    messages.success(request, 'Static Build triggered')
+
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))

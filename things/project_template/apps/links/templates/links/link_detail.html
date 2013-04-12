@@ -1,0 +1,41 @@
+{% extends "interior.html" %}
+
+{% block title %}Link: {{ object.name }}{% endblock title %}
+
+{% block content %}
+
+<div class="container">
+
+    <div class="row">
+
+        <div class="span8">
+
+            <h1><a href="{{ object.link_url }}">{{ object.name }}</a></h1>
+
+            <p>{{ object.content|safe }}</p>
+
+            {% if object.source_name and object.source_url %}
+
+                <p>&ndash; Via <a href="{{ object.source_url }}">{{ object.source_name }}</a></p>
+
+            {% elif object.source_name %}
+
+                <p>&ndash; Via {{ object.source_name }}</p>
+
+            {% elif object.source_url %}
+
+                <p>&ndash; <a href="{{ object.source_url }}">Via</a></p>
+
+            {% endif %}
+
+            {% if object.private %}
+                <p><strong>PRIVATE</strong></p>
+            {% endif %}
+
+            <p><a href="{{ object.get_absolute_url }}">#</a> {% if object.published_at %}| {{ object.published_at|date:"SHORT_DATETIME_FORMAT" }}{% endif %}</p>
+
+        </div>
+
+    </div>
+
+{% endblock content %}

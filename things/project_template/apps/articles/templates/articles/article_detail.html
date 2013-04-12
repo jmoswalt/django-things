@@ -1,0 +1,15 @@
+{% extends "interior.html" %}
+
+{% block title %}{{ object.name }} by {{ object.author }}{% endblock title %}
+
+{% block content %}
+    <div class="row">
+        <div class="span8">
+            <h1>{{ object.name }}</h1>
+            {% if object.author %}<p>By: {{ object.author }}</p>{% endif %}
+            {% if object.category %}<p>Category: {{ object.category }}</p>{% endif %}
+            {% if object.published_at %}<p>Published: {{ object.published_at|date:"m/d/Y h:i a" }}</p>{% endif %}
+            <p>{{ object.content|safe }}</p>
+        </div>
+    </div>
+{% endblock content %}

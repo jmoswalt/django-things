@@ -1,0 +1,8 @@
+@import url(http://fonts.googleapis.com/css?family=Syncopate);
+@import url(http://fonts.googleapis.com/css?family=Karla:400,400italic,700,700italic);
+body{background-color:#e6eaea;color:#333333;}
+h2,h3{font-family:'Karla',sans-serif;}
+header{margin:16px 0 30px;}header h1 a{color:#333333;font-family:'Syncopate',sans-serif;font-size:48px;line-height:30px;}
+header span{font-family:'Karla',sans-serif;font-size:14px;}
+header ul{margin:16px 0 0 0;}header ul li{display:inline;margin-right:10px;}
+footer{margin:20px 0 10px;}footer ul{display:inline;margin-left:0;}footer ul li{display:inline;margin-right:10px;}

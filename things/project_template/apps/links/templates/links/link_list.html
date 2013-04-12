@@ -1,0 +1,17 @@
+{% extends "interior.html" %}
+{% load i18n %}
+{% load pagination_tags %}
+
+{% block title %}{% trans "Link List" %}{% endblock title %}
+
+{% block content %}
+
+    {% autopaginate object_list 2000 %}
+
+    {% for object in object_list %}
+        {% include "links/_link_list_item.html" %}
+    {% endfor %}
+
+    {# paginate #}
+
+{% endblock content %}

@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load snippet_tags %}
+{% load thing_tags %}
+
+{% block title %}
+{% snippet 'home-title' striptags %}Your Homepage Title Here{% endsnippet %}
+{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/style.css">
+{% endblock head %}
+
+{% block body %}
+
+    {% include "header.html" %}
+
+    <div class="container">
+        <div class="row">
+            <div class="span8 offset2">
+                <h2>{% snippet 'home-title' striptags %}Your Homepage Title Here{% endsnippet %}</h2>
+                <div>
+                    {% snippet 'home-body' %}
+                    <p>Put some body text on your homepage</p>
+                    {% endsnippet %}
+                </div>
+                <div>
+                    {% get_things_by_type articles.article as things limit=2 %}
+                    {% for thing in things %}
+                    <h3><a href="{{ thing.get_absolute_url }}">{{ thing.name }}</a></h3>
+                    <div>{{ thing.content|safe|truncatewords_html:"20" }}</div>
+                    {% endfor %}
+                </div>
+            </div> <!-- /.span8 -->
+        </div> <!-- /.row -->
+    </div> <!-- /.container -->
+
+    {% include "footer.html" %}
+
+{% endblock body %}
