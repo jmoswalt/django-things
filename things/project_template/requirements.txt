@@ -1,15 +1,1 @@
-git+git://github.com/jmoswalt/django-things#egg=things-20130412.001
-
-# Caching
-johnny-cache==1.4
-python-memcached==1.48
-
-# Heroku deployment packages
-dj-database-url==0.2.1
-psycopg2==2.4.5
-gunicorn==0.17.2
-
-# For Sentry
-raven==3.2.1
-
-BeautifulSoup==3.2.1
+-r requirements/prod.txt

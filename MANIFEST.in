@@ -2,3 +2,5 @@ include README.md
 recursive-include things/static *
 recursive-include things/templates *
 recursive-include things/project_template *
+recursive-include things/pages/templates *
+recursive-include things/snippets/templates *

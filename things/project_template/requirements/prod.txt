@@ -1,0 +1,9 @@
+-r base.txt
+
+gunicorn==0.17.2
+gevent==0.13.8
+
+raven==3.2.1
+
+pylibmc==1.2.2
+django-pylibmc-sasl==0.2.4

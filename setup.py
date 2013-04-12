@@ -41,6 +41,12 @@ setup(
         'django-wysiwyg-redactor==0.3.1',
         'django-pagination==1.0.7',
         'django-storages==1.1.5',
+        'boto==2.6.0',
+        'Markdown==2.3.1',
+        'Pillow==2.0.0',
+        'johnny-cache==1.4',
+        'psycopg2==2.5',
+        'dj-database-url==0.2.1',
     ],
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
