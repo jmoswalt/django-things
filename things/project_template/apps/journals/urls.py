@@ -5,7 +5,7 @@ from .models import Journal
 
 urlpatterns = patterns(
     '',
-    url(r'^journals/$',
+    url(r'^journals/([\d]+)?/?$',
         ThingListView.as_view(model=Journal),
         name='journal_list'),
 

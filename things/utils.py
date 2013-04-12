@@ -1,6 +1,7 @@
 import os
 
 from django.http import Http404
+from django.core.cache import cache
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 
@@ -74,3 +75,11 @@ def get_thing_object(model, user, slug):
             **filters)
 
     return obj
+
+
+def clear_attr_cache(instance):
+    clear_keys = []
+    for key in instance.attrs_list():
+        clear_keys.append((".".join([settings.SITE_CACHE_KEY, '%s', str(instance.pk)]) % key))
+
+    cache.delete_many(clear_keys, None)

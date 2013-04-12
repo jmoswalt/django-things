@@ -2,7 +2,7 @@ import os
 import re
 
 from django.core.cache import cache
-
+from django.conf import settings
 
 def load_theme_snippets(theme_path):
     from .models import Snippet
@@ -41,3 +41,23 @@ def load_theme_snippets(theme_path):
                             cache.clear()
                         except Exception as e:
                             print e
+
+
+def clear_snippet_cache(snippet):
+    key = ".".join([settings.SITE_CACHE_KEY, 'snippet', snippet.slug])
+    cache.delete(key, None)
+
+
+def get_snippet_from_cache(slug):
+    from .models import Snippet
+
+    cache_key = "%s.%s.%s" % (settings.SITE_CACHE_KEY, 'snippet', slug)
+    cached = cache.get(cache_key)
+    if cached is None:
+        try:
+            snippet = Snippet.objects.get(slug=slug)
+            cached = snippet
+        except Snippet.DoesNotExist:
+            cached = ''
+        cache.set(cache_key, cached)
+    return cached

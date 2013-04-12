@@ -3,6 +3,7 @@ from dateutil.parser import parse
 
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User
+from django.core.cache import cache
 from django.core.files import File
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import models
@@ -10,7 +11,7 @@ from django.db.models import Q
 from django.conf import settings
 
 from .types import *
-from .utils import handle_uploaded_file
+from .utils import handle_uploaded_file, clear_attr_cache
 
 
 class AllThingsManager(models.Manager):
@@ -186,6 +187,8 @@ class Thing(models.Model):
                         datatype=datatype
                     )
 
+        clear_attr_cache(self)
+
     def obj_type(self):
         return self.content_type().name
 
@@ -193,13 +196,19 @@ class Thing(models.Model):
         return self._meta.verbose_name_plural
 
     def get_value_of_attribute(self, attr):
-        try:
-            data = Data.objects.get(thing=self.id, key=attr)
-            return data.value
-        except Data.DoesNotExist:
-            # return a string since the database is storing
-            # all Data objects as strings
-            return ''
+        cache_key = "%s.%s.%s" % (settings.SITE_CACHE_KEY, attr, self.pk)
+        cached = cache.get(cache_key)
+        if cached is None:
+            try:
+                data = Data.objects.get(thing=self.id, key=attr)
+                cached = data.value
+            except Data.DoesNotExist:
+                # return a string since the database is storing
+                # all Data objects as strings
+                cached = ''
+            cache.set(cache_key, cached)
+
+        return cached
 
 
 def register_thing(cls, attrs, ct=None):

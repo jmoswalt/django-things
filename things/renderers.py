@@ -1,3 +1,5 @@
+from math import ceil
+
 from django_medusa.renderers import StaticSiteRenderer
 from .models import Thing
 
@@ -8,8 +10,8 @@ class ThingRenderer(StaticSiteRenderer):
         # we don't end up with dupes.
         paths = set(['/'])
 
-        #items = BlogPost.objects.filter(is_live=True).order_by('-pubdate')
         for subclass in Thing.__subclasses__():
+            # Special case for built-in pages module
             if subclass._meta.app_label == "pages":
                 has_urls = True
             else:
@@ -17,13 +19,16 @@ class ThingRenderer(StaticSiteRenderer):
                     __import__('.'.join([subclass._meta.app_label, 'urls']))
                     has_urls = True
                 except ImportError:
-                    print "error on %s" % subclass._meta.app_label
+                    print "No urls for %s found" % subclass._meta.app_label
                     has_urls = False
 
             if has_urls:
                 if subclass._meta.app_label != "pages":
                     list_view = "/%s/" % subclass._meta.app_label
                     paths.add(list_view)
+                    # Add in paginated pages
+                    for p in xrange(int(ceil(subclass.objects.count()/float(20)))):
+                        paths.add("%s%s/" % (list_view, (p + 1)))
                 for item in subclass.objects.filter(**subclass.public_filter_out):
                     # Thing detail view
                     paths.add(item.get_absolute_url())

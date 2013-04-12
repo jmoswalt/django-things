@@ -3,12 +3,12 @@
 
 {% block content %}
 
-    {% autopaginate object_list 2000 %}
+    {% autopaginate object_list 20 %}
 
     {% for object in object_list %}
         {% include "articles/_article_list_item.html" %}
     {% endfor %}
 
-    {# paginate #}
+    {% paginate %}
 
 {% endblock content %}

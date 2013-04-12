@@ -12,7 +12,6 @@ class ThingDetailView(DetailView):
     default_template_name = "things/thing_detail.html"
 
     def get_object(self, **kwargs):
-        super(ThingDetailView, self).get_object(**kwargs)
         return get_thing_object(self.model, self.request.user, self.kwargs['slug'])
 
     def get_template_names(self):

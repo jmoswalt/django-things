@@ -3,7 +3,7 @@ from django.template.loader import get_template
 from django.utils.html import strip_tags
 from django.utils.safestring import mark_safe
 
-from ..models import Snippet
+from ..utils import get_snippet_from_cache
 
 register = Library()
 
@@ -55,8 +55,9 @@ class SnippetNode(Node):
             'snippet_content': None
         })
 
-        try:
-            snippet = Snippet.objects.get(slug=self.slug)
+        snippet = get_snippet_from_cache(slug=self.slug)
+
+        if snippet:
             content = snippet.content
             if striptags:
                 content = strip_tags(content)
@@ -65,8 +66,6 @@ class SnippetNode(Node):
                 'snippet_obj': snippet,
                 'snippet_content': content
             })
-        except Snippet.DoesNotExist:
-            pass
 
         t = get_template("_snippet.html")
         return t.render(Context(context))

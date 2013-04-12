@@ -5,7 +5,7 @@ from .models import Link
 
 urlpatterns = patterns(
     '',
-    url(r'^links/$',
+    url(r'^links/([\d]+)?/?$',
         ThingListView.as_view(model=Link),
         name='link_list'),
 

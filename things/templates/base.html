@@ -66,7 +66,7 @@
     {% if messages %}
     <script type="text/javascript">
     $(document).ready(function() {
-        var alerts = $(".alert-success").parent();
+        var alerts = $(".alert-success, .alert-info").parent();
         if (alerts) {
             alerts.delay(3000).fadeOut(1000, function () { $(this).remove(); });
         }
