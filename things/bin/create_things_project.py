@@ -22,7 +22,7 @@ def create_project():
     project_path = os.path.join(os.getcwd())
 
     # Create the list of packages to build from - at this stage it
-    # should only be one or two names, tendenci plus an alternate
+    # should only be one or two names, things plus an alternate
     # package.
     packages = ["things"]
     for package_name in packages:
