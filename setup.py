@@ -39,7 +39,6 @@ setup(
         'python-dateutil==2.1',
         'django-medusa',
         'django-wysiwyg-redactor==0.3.1',
-        'django-pagination==1.0.7',
         'django-storages==1.1.5',
         'boto==2.6.0',
         'Markdown==2.3.1',

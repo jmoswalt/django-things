@@ -192,7 +192,6 @@ if all([AWS_ACCESS_KEY,
 else:
     MEDUSA_RENDERER_CLASS = "django_medusa.renderers.DiskStaticSiteRenderer"
     MEDUSA_DEPLOY_DIR = path.join(PROJECT_ROOT, 'html')
-    STATIC_ROOT = path.join(PROJECT_ROOT, 'html', 'static')
 
 
 # -------------------------------------- #

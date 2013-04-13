@@ -1,1 +1,5 @@
+# Required to be here by Heroku to
+# properly bootstrap libmemcached
+pylibmc==1.2.3
+
 -r requirements/prod.txt

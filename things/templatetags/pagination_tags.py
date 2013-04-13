@@ -227,9 +227,9 @@ def paginate(context, window=DEFAULT_WINDOW, hashtag=''):
         return {}
 
 if CLEAN_URL:
-    template_path = 'pagination/pagination_clean_url.html'
-else:
     template_path = 'pagination/pagination.html'
+else:
+    template_path = 'pagination/pagination_querystring.html'
 
 register.inclusion_tag(template_path, takes_context=True)(
     paginate)
