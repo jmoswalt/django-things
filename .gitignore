@@ -6,3 +6,7 @@
 
 # except for .gitignore
 !/.gitignore
+
+# Distribution files
+/dist*
+*.egg-info

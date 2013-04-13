@@ -22,6 +22,8 @@ setup(
     version=__import__('things').__version__,
     license='GNU Lesser General Public License (LGPL), Version 3',
     url='https://github.com/jmoswalt/django-things',
+    author='John-Michael Oswalt (JMO)',
+    author_email='jmoswalt@gmail.com',
     include_package_data=True,
     packages=find_packages(),
     description='Two Table model for Django for storing other model data. With things, you can create a django project and generate a static site from your database content.',
