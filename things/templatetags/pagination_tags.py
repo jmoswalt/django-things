@@ -113,7 +113,7 @@ class AutoPaginateNode(template.Node):
         context['paginator'] = paginator
         context['page_obj'] = page_obj
         return u''
-    
+
 
 def paginate(context, window=DEFAULT_WINDOW, hashtag=''):
 
@@ -222,7 +222,7 @@ def paginate(context, window=DEFAULT_WINDOW, hashtag=''):
 
         return to_return
 
-    except KeyError, AttributeError:
+    except (KeyError, AttributeError):
 
         return {}
 
