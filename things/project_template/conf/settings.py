@@ -114,7 +114,6 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'pagination.middleware.PaginationMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.contrib.redirects.middleware.RedirectFallbackMiddleware',
 )
@@ -148,7 +147,6 @@ INSTALLED_APPS = (
     'django.contrib.redirects',
 
     'storages',
-    'pagination',
     'redactor',
     'django_medusa',
 

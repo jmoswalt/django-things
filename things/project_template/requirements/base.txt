@@ -1,2 +1,2 @@
-django-things>=0.1.11
+django-things>=0.1.12
 python-memcached==1.48
