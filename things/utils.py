@@ -3,6 +3,7 @@ import os
 from django.http import Http404
 from django.core.cache import cache
 from django.conf import settings
+from django.contrib.auth.models import AnonymousUser
 from django.shortcuts import get_object_or_404
 
 
@@ -35,7 +36,7 @@ def handle_uploaded_file(obj, f):
     return file_path
 
 
-def get_thing_objects_qs(model, user):
+def get_thing_objects_qs(model, user=AnonymousUser()):
     public_filter_out = model.public_filter_out or {}
     super_user_order = model.super_user_order or ['-created_at']
     public_order = model.public_order or ""
@@ -61,7 +62,7 @@ def get_thing_objects_qs(model, user):
     return queryset
 
 
-def get_thing_object(model, user, slug):
+def get_thing_object(model, slug, user=AnonymousUser()):
     public_filter_out = model.public_filter_out or {}
 
     if user.is_superuser:
