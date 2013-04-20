@@ -1,0 +1,55 @@
+body {
+    /* Add padding for the top bar */
+    padding-top: 32px;
+}
+
+#edit-bar .navbar-inner {
+    background-image: linear-gradient(to bottom, #ffd, #ffc);
+    background-image: -webkit-linear-gradient(to bottom, #ffd, #ffc);
+    background-image: -o-linear-gradient(to bottom, #ffd, #ffc);
+    background-image: -moz-linear-gradient(to bottom, #ffd, #ffc);
+    min-height: 30px;
+}
+
+#edit-bar .nav > .active > a {
+    background-color: #ffc;
+    margin-right: 6px;
+}
+
+#edit-bar .nav > li > a { padding: 6px 12px; }
+
+#edit-bar .navbar-inner .divider-vertical {
+    border-left: 1px solid #eeb;
+    border-right: 1px solid #eec;
+    height: 32px;
+}
+
+#edit-bar a { font-size: 13px; }
+#edit-bar .brand { font-size: 16px; padding: 6px 12px; }
+
+
+.edit-link {
+    position: absolute;
+    top: 0;
+    left: -30px;
+    font-family: Verdana, sans-serif;
+    display: block;
+    font-weight: normal;
+}
+
+.edit-parent {
+    position: relative;
+}
+
+@media (max-width: 979px) {
+    body { padding-top: 0px; }
+
+    .navbar-fixed-top {
+        margin-bottom: 10px;
+    }
+
+    #edit-bar .navbar-inner {
+        padding: 0 5px;
+    }
+
+}

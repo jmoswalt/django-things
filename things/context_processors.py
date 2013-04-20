@@ -1,3 +1,6 @@
+from django.conf import settings
+
+
 def extras(request):
     contexts = {}
 
@@ -8,5 +11,7 @@ def extras(request):
             request.session['edit_mode'] = False
 
     contexts['edit_mode'] = request.session.get('edit_mode', False)
+
+    contexts['USE_STATIC_SITE'] = settings.USE_STATIC_SITE
 
     return contexts

@@ -1,5 +1,5 @@
 /*!
- * Bootstrap v2.0.4
+ * Bootstrap v2.3.1
  *
  * Copyright 2012 Twitter, Inc
  * Licensed under the Apache License v2.0
@@ -63,8 +63,8 @@
 
 @import "tablesorter.less";
 
-a.label:hover { text-decoration: none; color: #fafafa; background-color: lighten(@blue, 6); }
-a.label:active { background-color: @blue;}
+// a.label:hover { text-decoration: none; color: #fafafa; background-color: lighten(@blue, 6); }
+// a.label:active { background-color: @blue;}
 
 .colorize {
     &.success { color: @green; }
@@ -73,6 +73,9 @@ a.label:active { background-color: @blue;}
     &.danger { color: lighten(@red,5); }
     &.important { color: lighten(@red,5); }
 }
+
+a.label-edit { background-color: lighten(@orange, 10); }
+a.label-edit:hover { background-color: darken(@orange, 10); }
 
 .alert p { margin-bottom: 3px; }
 

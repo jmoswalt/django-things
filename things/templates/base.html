@@ -5,6 +5,8 @@
 {% block html_open %}<html lang="en">{% endblock html_open %}
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     {% block x_ua_compatible %}<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">{% endblock x_ua_compatible %}
     {% block full_title %}
     <title>{% block title %}Django Things{% endblock title %}</title>
@@ -20,6 +22,10 @@
     <!--[if lt IE 9]>
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
+
+    {% if edit_mode %}
+    <link href="{{ STATIC_URL }}css/edit-mode.css" rel="stylesheet">
+    {% endif %}
 
     {% block head %}{% endblock head %}
 
@@ -61,6 +67,14 @@
         })
     });
     </script>
+
+        {% if edit_mode %}
+        <script type="text/javascript">
+        $(document).ready(function() {
+            $('.edit-link').parent().addClass('edit-parent');
+        });
+        </script>
+        {% endif %}
     {% endif %}
 
     {% if messages %}

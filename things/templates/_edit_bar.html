@@ -1,3 +1,30 @@
     {% if edit_mode %}
-    <div class="edit-alert alert fade in alert-warning" data-alert="alert">You are in Edit Mode. You may <a href="/admin/">Go to the Admin</a>{% if object %}, <a href="{{ object.get_edit_url }}?next={{ request.path }}">Edit this {{ object.content_type.name|title }}</a>,{% endif %} or <a href="{{ request.path }}?mode=">Leave Edit Mode</a>. You can also <a href="{% url 'deploy' %}">Rebuild the Static Site</a>.</div>
+
+
+        <div id="edit-bar" class="navbar navbar-fixed-top">
+            <div class="navbar-inner">
+                <div class="container">
+                    <a class="brand" href="#">Edit Mode</a>
+                    <ul class="nav">
+                        {% if object %}
+                        <li class="active"><a href="{{ object.get_edit_url }}?next={{ request.path }}">Edit this {{ object.content_type.name|title }}</a></li>
+                        {% else %}
+                        <li class="divider-vertical"></li>
+                        {% endif %}
+
+                        <li><a href="/admin/">Admin</a></li>
+                        <li class="divider-vertical"></li>
+
+                        {% if USE_STATIC_SITE %}
+                        <li><a href="{% url 'deploy' %}">Rebuild Site</a></li>
+                        <li class="divider-vertical"></li>
+                        {% endif %}
+
+                        <li><a href="{{ request.path }}?mode=">Exit Mode</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+
     {% endif %}

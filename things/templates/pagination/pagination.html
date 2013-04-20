@@ -1,7 +1,7 @@
 {% if is_paginated %}
 {% load i18n %}
 <!-- Clean URL pagination -->
-<div class="pagination">
+<div id="pager" class="pagination">
     <ul>
     {% if page_obj.has_previous %}
         <li><a href="/{{ current_url }}/{{ page_obj.previous_page_number }}/{{ getvars }}{{ hashtag }}" class="prev">&lsaquo;&lsaquo; {% trans "previous" %}</a></li>
@@ -16,11 +16,11 @@
                 <li><a href="/{{ current_url }}/{{ page }}/{{ getvars }}{{ hashtag }}" class="page">{{ page }}</a></li>
             {% endifequal %}
         {% else %}
-            ...
+            <li class="disabled"><a href="#pager">...</a></li>
         {% endif %}
     {% endfor %}
     {% if page_obj.has_next %}
-        <li><a href="/{{ current_url }}/{{ page_obj.next_page_number }}/{{ getvars }}{{ hashtag }}" class="next">{% trans "next" %} &rsaquo;&rsaquo;</a></li>
+        <li class="next"><a href="/{{ current_url }}/{{ page_obj.next_page_number }}/{{ getvars }}{{ hashtag }}">{% trans "next" %} &rsaquo;&rsaquo;</a></li>
     {% else %}
         <li class="disabled next"><a href="#">{% trans "next" %} &rsaquo;&rsaquo;</a></li>
     {% endif %}
