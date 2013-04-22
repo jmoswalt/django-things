@@ -53,7 +53,7 @@ def get_thing_objects_qs(model, user=AnonymousUser()):
                     value = '-datum__value'
                 else:
                     key = public_order
-                    value = 'datum_value'
+                    value = 'datum__value'
 
                 queryset = queryset.filter(datum__key=key).order_by(value)
             else:
