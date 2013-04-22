@@ -42,3 +42,10 @@ IMAGE = {
     "description": "Add an image to the {{ model }}.",
     "datatype": TYPE_FILE
 }
+
+ORDER = {
+    "name": "Order",
+    "key": "order",
+    "description": "The numerical order of the {{ model }}.",
+    "datatype": TYPE_INT
+}

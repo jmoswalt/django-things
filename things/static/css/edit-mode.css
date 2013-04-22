@@ -11,8 +11,11 @@
 }
 
 #edit-bar .nav > .active > a {
-    background-color: #ffc;
+    background-color: #ffb !important;
     margin-right: 6px;
+    -webkit-box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.125);
+    -moz-box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.125);
+    box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.125);
 }
 
 #edit-bar .nav > li > a { color: #333 !important; padding: 6px 12px; }
@@ -28,14 +31,16 @@
 #edit-bar .brand { font-size: 16px; line-height: 20px; padding: 6px 12px; }
 
 
-.edit-link {
+a.edit-link {
     position: absolute;
     top: 0;
-    left: -34px;
+    left: -32px;
     font-family: Verdana, sans-serif;
     display: block;
     font-weight: normal;
 }
+
+a.edit-link:visited { color: #fff; }
 
 .edit-parent {
     position: relative;
