@@ -1,7 +1,4 @@
-body {
-    /* Add padding for the top bar */
-    padding-top: 32px;
-}
+#edit-bar { z-index: 1050; }
 
 #edit-bar .navbar-inner {
     background-image: linear-gradient(to bottom, #ffd, #ffc);
@@ -9,6 +6,8 @@ body {
     background-image: -o-linear-gradient(to bottom, #ffd, #ffc);
     background-image: -moz-linear-gradient(to bottom, #ffd, #ffc);
     min-height: 30px;
+    text-align: left;
+    background-color: #ffc !important;
 }
 
 #edit-bar .nav > .active > a {
@@ -16,7 +15,8 @@ body {
     margin-right: 6px;
 }
 
-#edit-bar .nav > li > a { padding: 6px 12px; }
+#edit-bar .nav > li > a { color: #333 !important; padding: 6px 12px; }
+#edit-bar .nav > li > a:hover { background-color: #ffa !important; }
 
 #edit-bar .navbar-inner .divider-vertical {
     border-left: 1px solid #eeb;
@@ -25,13 +25,13 @@ body {
 }
 
 #edit-bar a { font-size: 13px; }
-#edit-bar .brand { font-size: 16px; padding: 6px 12px; }
+#edit-bar .brand { font-size: 16px; line-height: 20px; padding: 6px 12px; }
 
 
 .edit-link {
     position: absolute;
     top: 0;
-    left: -30px;
+    left: -34px;
     font-family: Verdana, sans-serif;
     display: block;
     font-weight: normal;
@@ -42,8 +42,6 @@ body {
 }
 
 @media (max-width: 979px) {
-    body { padding-top: 0px; }
-
     .navbar-fixed-top {
         margin-bottom: 10px;
     }

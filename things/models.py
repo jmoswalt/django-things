@@ -96,7 +96,10 @@ class Thing(models.Model):
     objects = ThingManager()
     all_things = AllThingsManager()
 
+    # Default properties
     public_filter_out = {}
+    public_order = '-created_at'
+    super_user_order = ('-created_at',)
 
     def __init__(self, *args, **kwargs):
         super(Thing, self).__init__(*args, **kwargs)

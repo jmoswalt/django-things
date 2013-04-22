@@ -63,6 +63,7 @@ class SnippetNode(Node):
                 content = strip_tags(content)
             content = mark_safe(content)
             context.update({
+                'strip_tags': striptags,
                 'snippet_obj': snippet,
                 'snippet_content': content
             })

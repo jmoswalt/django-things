@@ -4,6 +4,7 @@ import re
 from django.core.cache import cache
 from django.conf import settings
 
+
 def load_theme_snippets(theme_path):
     from .models import Snippet
 
@@ -11,7 +12,7 @@ def load_theme_snippets(theme_path):
         for f in files:
             with open(os.path.join(root, f)) as fi:
 
-                matches = re.findall("{% snippet ([\\w\\-\\s\\'\\\"]+) %}([^{%]+)?{% endsnippet %}", fi.read(), re.I)
+                matches = re.findall("{% snippet ([\\w\\-\\s\\'\\\"]+) %}([^{]+)?{% endsnippet %}", fi.read(), re.I)
                 for match in matches:
                     snippet_key = re.search("([\\'\\\"])([\\w\\-]+)([\\'\\\"])( striptags)?", match[0], re.I)
                     snippet_value = match[1]

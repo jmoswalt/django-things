@@ -1,3 +1,5 @@
 {% if snippet_content %}
+{% if not strip_tags and edit_mode %}<div>{% endif %}
 {{ snippet_content }} {% include "_edit_link.html" with object=snippet_obj %}
+{% if not strip_tags and edit_mode %}</div>{% endif %}
 {% endif %}
