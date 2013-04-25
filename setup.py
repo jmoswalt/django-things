@@ -45,8 +45,6 @@ setup(
         'boto==2.6.0',
         'Markdown==2.3.1',
         'Pillow==2.0.0',
-        'psycopg2==2.5',
-        'dj-database-url==0.2.1',
     ],
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',

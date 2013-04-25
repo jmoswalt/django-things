@@ -1,0 +1,4 @@
+django-things>=0.1.19
+python-memcached==1.48
+psycopg2==2.5
+dj-database-url==0.2.1

@@ -18,6 +18,34 @@ class AllThingsManager(models.Manager):
     pass
 
 
+class ExtraThingsManager(models.Manager):
+    """
+    Used for querying all non-base things (not pages or snippets)
+    and maintaining their original class by combining querysets
+    as lists.
+    """
+    def limit(self, limit=0):
+        pages_ct = ContentType.objects.get(app_label='pages', model='page')
+        snippets_ct = ContentType.objects.get(app_label='snippets', model='snippet')
+        sub_classes = self.model.__subclasses__()
+        query_sets = []
+        for sub_class in sub_classes:
+            if sub_class not in [pages_ct.model_class(), snippets_ct.model_class()]:
+                # Set the model to be the sub_class in Things
+                self.model = sub_class
+                query = super(ExtraThingsManager, self).get_query_set().filter(content_type_id=self.model.content_type().pk).order_by('-updated_at')[:limit]
+                query_sets.append([(item, item.updated_at) for item in query])
+        # If we have multiple querysets, add them together
+        if query_sets:
+            results = []
+            for qs in query_sets:
+                for t in qs:
+                    results.append(t)
+            return sorted(results, key=lambda thing: thing[1], reverse=True)
+
+        return super(ExtraThingsManager, self).get_query_set().exclude(content_type_id__in=[pages_ct.pk, snippets_ct.pk])
+
+
 class ThingManager(models.Manager):
     def get_query_set(self):
         return super(ThingManager, self).get_query_set().filter(content_type_id=self.model.content_type().pk)
@@ -95,6 +123,7 @@ class Thing(models.Model):
 
     objects = ThingManager()
     all_things = AllThingsManager()
+    extra_things = ExtraThingsManager()
 
     # Default properties
     public_filter_out = {}
@@ -118,7 +147,8 @@ class Thing(models.Model):
 
                 if f['datatype'] == TYPE_FOREIGNKEY:
                     fk_model = f['model']
-                    val = fk_model.objects.get(pk=val)  # Foreign Object
+                    if val:
+                        val = fk_model.objects.get(pk=val)  # Foreign Object
 
                 if f['datatype'] == TYPE_FILE:
                     if val:
@@ -155,13 +185,16 @@ class Thing(models.Model):
     def attrs_list(cls):
         return [k['key'] for k in cls.attrs]
 
+    def obj_content_type(self):
+        return ContentType.objects.get(pk=self.content_type_id)
+
     @models.permalink
     def get_absolute_url(self):
-        return ("%s_detail" % self.content_type().name.replace(' ', '_'), [self.slug])
+        return ("%s_detail" % self.obj_content_type().name.replace(' ', '_'), [self.slug])
 
     @models.permalink
     def get_edit_url(self):
-        ct = self.content_type()
+        ct = self.obj_content_type()
         return ("admin:%s_%s_change" % (ct.app_label, ct.name), [self.pk])
 
     def save(self, *args, **kwargs):
@@ -193,7 +226,7 @@ class Thing(models.Model):
         clear_attr_cache(self)
 
     def obj_type(self):
-        return self.content_type().name
+        return self.obj_content_type().name
 
     def obj_type_plural(self):
         return self._meta.verbose_name_plural

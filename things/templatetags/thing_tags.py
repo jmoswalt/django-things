@@ -58,7 +58,7 @@ def get_things_by_type(parser, token):
         message = "'%s' tag requires more than 4" % bits[0]
         raise TemplateSyntaxError(message)
 
-    if "." not in bits[1]:
+    if bits[1] != "all" and "." not in bits[1]:
         message = "'%s' must contain a '.'" % bits[0]
         raise TemplateSyntaxError(message)
 
@@ -81,13 +81,16 @@ class ListThingsNode(Node):
         self.context_var = context_var
         self.kwargs = kwargs
 
-        ct = ContentType.objects.get(
-            app_label=content_type.split('.')[0],
-            model=content_type.split('.')[1])
-        self.model = ct.model_class()
-        if self.model.__base__ is not Thing:
-            message = "'%s' parent class must be Thing" % content_type
-            raise TemplateSyntaxError(message)
+        if content_type == "all":
+            self.model = None
+        else:
+            ct = ContentType.objects.get(
+                app_label=content_type.split('.')[0],
+                model=content_type.split('.')[1])
+            self.model = ct.model_class()
+            if self.model.__base__ is not Thing:
+                message = "'%s' parent class must be Thing" % content_type
+                raise TemplateSyntaxError(message)
 
     def render(self, context):
         limit = 3
@@ -105,7 +108,10 @@ class ListThingsNode(Node):
 
         limit = int(limit)
 
-        items = get_thing_objects_qs(self.model, user)
+        if self.model:
+            items = get_thing_objects_qs(self.model, user)
+        else:
+            items = [i[0] for i in Thing.extra_things.limit(limit)]
 
         objects = [item for item in items[:limit]]
 
