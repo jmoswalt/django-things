@@ -111,7 +111,20 @@ class ListThingsNode(Node):
         if self.model:
             items = get_thing_objects_qs(self.model, user)
         else:
-            items = [i[0] for i in Thing.extra_things.limit(limit)]
+            pages_ct = ContentType.objects.get(app_label='pages', model='page')
+            snippets_ct = ContentType.objects.get(app_label='snippets', model='snippet')
+            sub_classes = Thing.__subclasses__()
+            query_sets = []
+            for sub_class in sub_classes:
+                if sub_class not in [pages_ct.model_class(), snippets_ct.model_class()]:
+                    query = get_thing_objects_qs(sub_class, user)[:limit]
+                    query_sets.append([(item, item.updated_at) for item in query])
+            results = []
+            for qs in query_sets:
+                for t in qs:
+                    results.append(t)
+            items = sorted(results, key=lambda thing: thing[1], reverse=True)
+            items = [i[0] for i in items]
 
         objects = [item for item in items[:limit]]
 

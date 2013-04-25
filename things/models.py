@@ -18,34 +18,6 @@ class AllThingsManager(models.Manager):
     pass
 
 
-class ExtraThingsManager(models.Manager):
-    """
-    Used for querying all non-base things (not pages or snippets)
-    and maintaining their original class by combining querysets
-    as lists.
-    """
-    def limit(self, limit=0):
-        pages_ct = ContentType.objects.get(app_label='pages', model='page')
-        snippets_ct = ContentType.objects.get(app_label='snippets', model='snippet')
-        sub_classes = self.model.__subclasses__()
-        query_sets = []
-        for sub_class in sub_classes:
-            if sub_class not in [pages_ct.model_class(), snippets_ct.model_class()]:
-                # Set the model to be the sub_class in Things
-                self.model = sub_class
-                query = super(ExtraThingsManager, self).get_query_set().filter(content_type_id=self.model.content_type().pk).order_by('-updated_at')[:limit]
-                query_sets.append([(item, item.updated_at) for item in query])
-        # If we have multiple querysets, add them together
-        if query_sets:
-            results = []
-            for qs in query_sets:
-                for t in qs:
-                    results.append(t)
-            return sorted(results, key=lambda thing: thing[1], reverse=True)
-
-        return super(ExtraThingsManager, self).get_query_set().exclude(content_type_id__in=[pages_ct.pk, snippets_ct.pk])
-
-
 class ThingManager(models.Manager):
     def get_query_set(self):
         return super(ThingManager, self).get_query_set().filter(content_type_id=self.model.content_type().pk)
@@ -123,7 +95,6 @@ class Thing(models.Model):
 
     objects = ThingManager()
     all_things = AllThingsManager()
-    extra_things = ExtraThingsManager()
 
     # Default properties
     public_filter_out = {}
