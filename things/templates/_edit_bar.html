@@ -1,30 +1,17 @@
     {% if edit_mode %}
 
+        <div class="btn-group eb2">
+                {% if object %}
+                <button class="btn btn-warning"><a href="{{ object.get_edit_url }}?next={{ request.path }}">Edit this {{ object.content_type.name|title }}</a></button>
+                {% endif %}
 
-        <div id="edit-bar" class="navbar navbar-fixed-bottom">
-            <div class="navbar-inner">
-                <div class="container">
-                    <a class="brand" href="#">Edit Mode</a>
-                    <ul class="nav">
-                        {% if object %}
-                        <li class="active"><a href="{{ object.get_edit_url }}?next={{ request.path }}">Edit this {{ object.content_type.name|title }}</a></li>
-                        {% else %}
-                        <li class="divider-vertical"></li>
-                        {% endif %}
+                <button class="btn btn-warning"><a href="/admin/">Admin</a></button>
 
-                        <li><a href="/admin/">Admin</a></li>
-                        <li class="divider-vertical"></li>
+                {% if USE_STATIC_SITE %}
+                <button class="btn btn-warning"><a href="{% url 'deploy' %}">Rebuild Site</a></button>
+                {% endif %}
 
-                        {% if USE_STATIC_SITE %}
-                        <li><a href="{% url 'deploy' %}">Rebuild Site</a></li>
-                        <li class="divider-vertical"></li>
-                        {% endif %}
-
-                        <li><a href="{{ request.path }}?mode=">Exit Mode</a></li>
-                    </ul>
-                </div>
-            </div>
+                <button class="btn btn-warning"><a href="{{ request.path }}?mode=">Exit Mode</a></button>
         </div>
-
 
     {% endif %}
