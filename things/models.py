@@ -4,6 +4,7 @@ from dateutil.parser import parse
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User
 from django.core.cache import cache
+from django.core.urlresolvers import reverse
 from django.core.files import File
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import models
@@ -153,8 +154,35 @@ class Thing(models.Model):
         return cls.attrs
 
     @classmethod
+    def extra_apps(cls):
+        classes = []
+        pages_ct = ContentType.objects.get(app_label='pages', model='page')
+        snippets_ct = ContentType.objects.get(app_label='snippets', model='snippet')
+        sub_classes = cls.__subclasses__()
+        for sub_class in sub_classes:
+            if sub_class not in [pages_ct.model_class(), snippets_ct.model_class()]:
+                classes.append(sub_class)
+        return classes
+
+    @classmethod
+    def content_apps(cls):
+        classes = []
+        snippets_ct = ContentType.objects.get(app_label='snippets', model='snippet')
+        sub_classes = cls.__subclasses__()
+        for sub_class in sub_classes:
+            if sub_class != snippets_ct.model_class():
+                classes.append(sub_class)
+        return classes
+
+    @classmethod
     def attrs_list(cls):
         return [k['key'] for k in cls.attrs]
+
+
+    @classmethod
+    def get_add_url(cls):
+        ct = cls.content_type()
+        return reverse("admin:%s_%s_add" % (ct.app_label, ct.name))
 
     def obj_content_type(self):
         return ContentType.objects.get(pk=self.content_type_id)
