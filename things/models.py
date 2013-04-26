@@ -197,7 +197,7 @@ class Thing(models.Model):
         clear_attr_cache(self)
 
     def obj_type(self):
-        return self.obj_content_type().name
+        return self.content_type().name
 
     def obj_type_plural(self):
         return self._meta.verbose_name_plural
