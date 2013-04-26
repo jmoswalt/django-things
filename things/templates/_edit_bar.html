@@ -1,6 +1,6 @@
     {% if edit_mode %}
 
-        <div class="btn-group eb2">
+        <div id="editbar" class="btn-group">
                 {% if object %}
                 <button class="btn btn-warning"><a href="{{ object.get_edit_url }}?next={{ request.path }}">Edit this {{ object.content_type.name|title }}</a></button>
                 {% endif %}

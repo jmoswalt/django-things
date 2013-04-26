@@ -1,7 +1,7 @@
-.eb2 { background-color: #e81; position: fixed; top: 0; right: 8%; z-index: 1100;}
+#editbar { background-color: #e81; position: fixed; top: 0; right: 8%; z-index: 1100;}
 
-.eb2 a { color: #fafafa; }
-.eb2 a:hover { text-decoration: none; }
+#editbar a { color: #fafafa; }
+#editbar a:hover { text-decoration: none; }
 
 a.edit-link {
     position: absolute;
