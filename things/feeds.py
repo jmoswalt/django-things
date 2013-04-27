@@ -1,6 +1,7 @@
 from django.contrib.syndication.views import Feed
 from django.conf import settings
 from django.contrib.sites.models import Site
+from django.utils import timezone
 
 from .models import Thing
 from .utils import get_thing_objects_qs
@@ -46,7 +47,7 @@ class AllThingsFeed(Feed):
             item_per_feed_cnt = 0
             for item in feed_instance.items():
                 self.feed_for_item[item] = feed_instance
-                self.all_items.append((item, self.item_pubdate(item)))
+                self.all_items.append((item, timezone.make_aware(self.item_pubdate(item), timezone.utc)))
                 item_per_feed_cnt += 1
                 if item_per_feed_cnt >= 20:
                     break
