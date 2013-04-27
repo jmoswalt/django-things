@@ -31,7 +31,9 @@
 
     <script type="text/javascript">
       var _gaq = _gaq || [];
+      {% spaceless %}
       _gaq.push(['_setAccount', '{% snippet "google-analytics-ua" striptags %}{% endsnippet %}']);
+      {% endspaceless %}
       _gaq.push(['_trackPageview']);
       (function() {
         var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;

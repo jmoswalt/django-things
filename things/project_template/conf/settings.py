@@ -143,16 +143,17 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.markup',
     'django.contrib.staticfiles',
-    'django.contrib.admin',
     'django.contrib.redirects',
 
     'storages',
-    'redactor',
     'django_medusa',
 
     'things',
     'things.pages',
     'things.snippets',
+
+    'redactor',
+    'django.contrib.admin',
 )
 
 THINGS_APPS = ()

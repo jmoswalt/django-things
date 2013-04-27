@@ -1,0 +1,14 @@
+{% extends "admin/base.html" %}
+{% load i18n %}
+
+{% block title %}Things Administration{% endblock title %}
+
+{% block branding %}
+<h1 id="site-name" ><a href="/">{% trans "Things Administration" %}</a></h1>
+{% endblock %}
+
+{% block footer %}
+<div id="footer">
+<p>{% trans "Powered By" %} <a href="https://github.com/jmoswalt/django-things/">{% trans "Django Things" %}</a></p>
+</div>
+{% endblock %}
