@@ -230,6 +230,9 @@ class Thing(models.Model):
     def obj_type_plural(self):
         return self._meta.verbose_name_plural
 
+    def default_order_field(self):
+        return getattr(self, self.public_order.replace('-', ''))
+
     def get_value_of_attribute(self, attr):
         cache_key = "%s.%s.%s" % (settings.SITE_CACHE_KEY, attr, self.pk)
         cached = cache.get(cache_key)

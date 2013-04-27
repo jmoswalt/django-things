@@ -10,7 +10,7 @@ urlpatterns = patterns(
     url(r'^deploy/$',
         static_build,
         name='deploy'),
-    url(r'^feed/$', AllThingsFeed()),
+    url(r'^feed/$', AllThingsFeed(), name="feed_all"),
     url(r'^(?P<slug>[\w\-\/]+)/$',
         ThingDetailView.as_view(model=Page),
         name='page_detail'),

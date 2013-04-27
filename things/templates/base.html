@@ -13,6 +13,7 @@
     {% endblock full_title %}
 
     <meta name="description" content="{% block description %}{% endblock description %}" />
+    <link rel="alternate" type="application/rss+xml" title="RSS" href="{% url 'feed_all' %}" />
 
     {% block bootstrap_css_link %}
     <link href="{{ STATIC_URL }}css/bootstrap-custom.css" rel="stylesheet">

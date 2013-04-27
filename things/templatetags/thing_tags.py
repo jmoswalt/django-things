@@ -3,6 +3,7 @@ from django.template.defaultfilters import date
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import AnonymousUser
 from django.conf import settings
+from django.utils import timezone
 
 from things.types import TYPE_DATE, TYPE_FILE
 from things.models import Thing
@@ -118,7 +119,7 @@ class ListThingsNode(Node):
             for sub_class in sub_classes:
                 if sub_class not in [pages_ct.model_class(), snippets_ct.model_class()]:
                     query = get_thing_objects_qs(sub_class, user)[:limit]
-                    query_sets.append([(item, item.updated_at) for item in query])
+                    query_sets.append([(item, timezone.make_aware(item.default_order_field(), timezone.utc)) for item in query])
             results = []
             for qs in query_sets:
                 for t in qs:
