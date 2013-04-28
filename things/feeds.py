@@ -1,4 +1,5 @@
 from django.contrib.syndication.views import Feed
+from django.contrib.sitemaps import Sitemap
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.utils import timezone
@@ -89,3 +90,21 @@ def get_thing_subfeeds():
         except ImportError:
             pass
     return ThingFeed.__subclasses__()
+
+
+class ThingSitemap(Sitemap):
+    changefreq = "never"
+    priority = 0.4
+
+    def items(self):
+        items = []
+        apps = Thing.content_apps()
+        for app in apps:
+            query = get_thing_objects_qs(app)
+            for item in query:
+                items.append(item)
+
+        return items
+
+    def lastmod(self, obj):
+        return obj.updated_at

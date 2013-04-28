@@ -32,6 +32,7 @@ setup(
     entry_points="""
             [console_scripts]
             create-things-project=things.bin.create_things_project:create_project
+            update-things-project=things.bin.update_things_project:update_project
         """,
     dependency_links=[
         "https://github.com/mtigas/django-medusa/tarball/master#egg=django_medusa-0.1.0",

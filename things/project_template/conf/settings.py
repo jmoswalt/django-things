@@ -144,6 +144,7 @@ INSTALLED_APPS = (
     'django.contrib.markup',
     'django.contrib.staticfiles',
     'django.contrib.redirects',
+    'django.contrib.sitemaps',
 
     'storages',
     'django_medusa',
