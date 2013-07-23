@@ -1,45 +1,104 @@
-## Django-things
+# Django-things
 
 Django Things is a framework designed around making quick models for a CMS. Django Things stores everything in one of two tables: Things and Values. This makes schema changes very easy since the schema isn't really kept in the database.
 
-### Installation
+## Installation
 
 Django Things works out of your virtual environment using virtualenv. If you aren't using `virtualenv`, you probably should be.
 
 First, you should make a new folder for your things project and cd into it:
 
-`mkdir my-things`
-`cd my-things`
+    mkdir my-things
+    cd my-things`
 
 To install, first make your virtualenv with a command like:
 
-`virtualenv venv`
+    virtualenv venv
 
 Then, activate the environment with:
 
-`source venv/bin/activate`
+    source venv/bin/activate
 
 Next, we install Django Things:
 
-`pip install django-things`
+    pip install django-things
 
 This will install some dependencies like Django itself. Once this has completed, we run a command to build our basic project:
 
-`create-things-project`
+    create-things-project
 
 This will build a Django project in the current directory. It builds your `settings.py` and `urls.py` files, both in the `conf` directory. Additionally, there is a requirements directory that we will use to install more requirements. We can install the additional requirements with:
 
-`pip install -r requirements/dev.txt`
+    pip install -r requirements/dev.txt
 
 This will install all of the common requirements, along with the django debug toolbar for local debugging. If you are installing for production on your own server or a host like Heroku, you can simply use `pip install -r requirements.txt` to get the production dependencies.
 
 When running locally or on your own server, Environment Variables can be set in the `.env` file that has been created. You will want to modify the database setting below with your database location and credentials:
 
-`DATABASE_URL='postgres://localhost/django_things'`
+    DATABASE_URL='postgres://localhost/django_things'
 
 You may also want to uncomment things like the `DEBUG` setting and change your `SECRET_KEY` to something unique to you.
 
-### Custom Apps
+Next, we run the initial sync to create the database tables. This is a great time to add a superuser when prompted.
+
+    python manage.py syncdb
+
+If DEBUG is not set to true in the `.env` file, you should also run `python manage.py collectstatic` so the styles come through.
+
+Finally, you are ready to view the site at [http://127.0.0.1:8000/]()
+   
+
+## Theming
+
+Custom themes can be created for django things websites. Themes go in the `themes` directory in the root of the project. By default, there is a theme called `default_theme` that can be used as an example.
+
+The theme for the site is set in the `.env` file like below:
+
+    THEME='default_theme'
+    
+Only one theme can be used at a time.
+
+Inside the individual theme folder, there are two directories: **static** and **templates**
+
+#### Static folder
+
+The static folder as you may have guessed contains static assets like CSS, JS, and fonts that are to be used in the theme. These files are collected when running `collectstatic`
+
+#### Templates folder
+
+Inside the templates folder, only two files are required: **home.html** and **interior.html**
+
+`home.html`: This template is used only for the homepage of the website.
+
+`interior.html`: This template is used for all pages that aren't the homepage.
+
+Both template files should extend base.html with this at the top:
+
+    {% extends 'base.html' %}
+
+#### Template blocks
+
+Content should be added within `{% block %}` tags. The following blocks are available to be used by the base template:
+
+`title`: This is rendered as the html title in the document head.
+
+`head`: This is added to the end of the document head. It's where you should add fonts, stylesheets, and other meta elements.
+
+`body`: This is the main content area of the template. It loads in the document body.
+
+`js`: This is loaded at the end of the document. It's where you should add your javascript files. jQuery is included by default, so you don't need to include it.
+
+Below are some less common blocks that you may also use:
+
+`x_ua_compatible`: This by default adds `<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">` to the top of the document. If you need to override this,  please override the block.
+
+`description`: This is the meta description. It can be populated within custom apps, or just in a template like homepage.html
+
+`bootstrap_css_link`: This includes bootstrap CSS by default. You can override this to remove the default bootstrap CSS.
+
+`jquery`: This includes jquery by default (currently 1.8.3). You can override this block with a different version of jquery. If you remove jquery all together, it will affect some of the site's functions.
+
+## Custom Apps
 
 The apps that are used with Django Things are a bit different than the models and views you might normally use with Django. The default comes with an `articles` app that is explained below.
 
@@ -58,9 +117,13 @@ The Thing class is packed with functionality to automatically map fields using a
 All `Thing` models include these fields by default:
 
 `title`: Title is a simple charfield.
+
 `slug`: Slug is a slugfield which is unique across all apps.
+
 `creator`: Creator is a foregin key to the User table
+
 `created_at`: This is an automated timestamp when the record is created
+
 `updated_at`: This is an automated timestamp that updates whenever a record is changed.
 
 We don't actually put our fields in our model. Instead, we set them in a dictionary, in this case named `ARITCLE_ATTRIBUTES`. In articles, you will see some default attrs used, as well as a custom attr defined:

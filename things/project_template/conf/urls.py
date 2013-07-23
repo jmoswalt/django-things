@@ -2,21 +2,11 @@ from os.path import join
 
 from django.conf.urls import patterns, include, url
 from django.conf import settings
-from django.contrib import admin
-from django.views.generic import TemplateView
-admin.autodiscover()
-
-urlpatterns = patterns(
-    '',
-    url(r'^$', TemplateView.as_view(template_name='home.html'), name='home'),
-    url(r'^admin/', include(admin.site.urls)),
-    url(r'^redactor/', include('redactor.urls')),
-)
 
 
 # Include urls to catch media requests in case
 # the web server (nginx/apache/etc.) isn't setup
-urlpatterns += patterns(
+urlpatterns = patterns(
     '',
     (r'^static/(?P<path>.*)$',
         'django.views.static.serve',
