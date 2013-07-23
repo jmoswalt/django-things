@@ -1,12 +1,12 @@
 {% block messages %}
-    {% if messages %}
-    {% for message in messages %}
-    <div>
-        <div class="alert fade in{% if message.tags %} alert-{{ message.tags }}{% endif %}" data-alert="alert">
-            <a class="close" data-dismiss="alert" href="#">×</a>
-            <p>{{ message|safe }}</p>
-        </div>
+  {% if messages %}
+  {% for message in messages %}
+  <div>
+    <div class="alert fade in{% if message.tags %} alert-{{ message.tags }}{% endif %}" data-alert="alert">
+      <a class="close" data-dismiss="alert" href="#">×</a>
+      <p>{{ message|safe }}</p>
     </div>
-    {% endfor %}
-    {% endif %}
+  </div>
+  {% endfor %}
+  {% endif %}
 {% endblock %}

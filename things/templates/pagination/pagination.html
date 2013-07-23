@@ -2,28 +2,28 @@
 {% load i18n %}
 <!-- Clean URL pagination -->
 <div id="pager" class="pagination">
-    <ul>
-    {% if page_obj.has_previous %}
-        <li><a href="/{{ current_url }}/{{ page_obj.previous_page_number }}/{{ getvars }}{{ hashtag }}" class="prev">&lsaquo;&lsaquo; {% trans "previous" %}</a></li>
+  <ul>
+  {% if page_obj.has_previous %}
+    <li><a href="/{{ current_url }}/{{ page_obj.previous_page_number }}/{{ getvars }}{{ hashtag }}" class="prev">&lsaquo;&lsaquo; {% trans "previous" %}</a></li>
+  {% else %}
+    <li class="disabled prev"><a href="#">&lsaquo;&lsaquo; {% trans "previous" %}</a></li>
+  {% endif %}
+  {% for page in pages %}
+    {% if page %}
+      {% ifequal page page_obj.number %}
+        <li class="current page active"><a href="#">{{ page }}</a></li>
+      {% else %}
+        <li><a href="/{{ current_url }}/{{ page }}/{{ getvars }}{{ hashtag }}" class="page">{{ page }}</a></li>
+      {% endifequal %}
     {% else %}
-        <li class="disabled prev"><a href="#">&lsaquo;&lsaquo; {% trans "previous" %}</a></li>
+      <li class="disabled"><a href="#pager">...</a></li>
     {% endif %}
-    {% for page in pages %}
-        {% if page %}
-            {% ifequal page page_obj.number %}
-                <li class="current page active"><a href="#">{{ page }}</a></li>
-            {% else %}
-                <li><a href="/{{ current_url }}/{{ page }}/{{ getvars }}{{ hashtag }}" class="page">{{ page }}</a></li>
-            {% endifequal %}
-        {% else %}
-            <li class="disabled"><a href="#pager">...</a></li>
-        {% endif %}
-    {% endfor %}
-    {% if page_obj.has_next %}
-        <li class="next"><a href="/{{ current_url }}/{{ page_obj.next_page_number }}/{{ getvars }}{{ hashtag }}">{% trans "next" %} &rsaquo;&rsaquo;</a></li>
-    {% else %}
-        <li class="disabled next"><a href="#">{% trans "next" %} &rsaquo;&rsaquo;</a></li>
-    {% endif %}
-    </ul>
+  {% endfor %}
+  {% if page_obj.has_next %}
+    <li class="next"><a href="/{{ current_url }}/{{ page_obj.next_page_number }}/{{ getvars }}{{ hashtag }}">{% trans "next" %} &rsaquo;&rsaquo;</a></li>
+  {% else %}
+    <li class="disabled next"><a href="#">{% trans "next" %} &rsaquo;&rsaquo;</a></li>
+  {% endif %}
+  </ul>
 </div>
 {% endif %}

@@ -4,12 +4,12 @@
 
 {% block content %}
 
-    {% autopaginate object_list 20 %}
+  {% autopaginate object_list 20 %}
 
-    {% for object in object_list %}
-        {% include "links/_link_list_item.html" %}
-    {% endfor %}
+  {% for object in object_list %}
+    {% include "links/_link_list_item.html" %}
+  {% endfor %}
 
-    {% paginate %}
+  {% paginate %}
 
 {% endblock content %}

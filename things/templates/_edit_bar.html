@@ -1,37 +1,37 @@
 {% if request.user.is_superuser %}
-    {% if edit_mode %}
+  {% if edit_mode %}
 
-        <div id="editbar" class="btn-group">
-            {% if object %}
-            <button class="btn btn-warning"><a href="{{ object.get_edit_url }}?next={{ request.path }}">Edit this {{ object.content_type.name|title }}</a></button>
-            {% endif %}
+    <div id="editbar" class="btn-group">
+      {% if object %}
+      <button class="btn btn-warning"><a href="{{ object.get_edit_url }}?next={{ request.path }}">Edit this {{ object.content_type.name|title }}</a></button>
+      {% endif %}
 
-            <div class="btn-group">
-                <button class="btn btn-success dropdown-toggle" data-toggle="dropdown">Add <span class="caret"></span></button>
-                <ul class="dropdown-menu">
-                    {% for app in CONTENT_APPS %}
-                    <li><a href="{{ app.get_add_url }}?next={{ request.path }}">Add {{ app.obj_type|title }}</a></li>
-                    {% endfor %}
-                </ul>
-            </div>
+      <div class="btn-group">
+        <button class="btn btn-success dropdown-toggle" data-toggle="dropdown">Add <span class="caret"></span></button>
+        <ul class="dropdown-menu">
+          {% for app in CONTENT_APPS %}
+          <li><a href="{{ app.get_add_url }}?next={{ request.path }}">Add {{ app.obj_type|title }}</a></li>
+          {% endfor %}
+        </ul>
+      </div>
 
 
-            <button class="btn btn-warning"><a href="/admin/">Admin</a></button>
+      <button class="btn btn-warning"><a href="/admin/">Admin</a></button>
 
-            {% if USE_STATIC_SITE %}
-            <button class="btn btn-warning"><a href="{% url 'deploy' %}">Rebuild Site</a></button>
-            {% endif %}
+      {% if USE_STATIC_SITE %}
+      <button class="btn btn-warning"><a href="{% url 'deploy' %}">Rebuild Site</a></button>
+      {% endif %}
 
-            <button class="btn btn-warning"><a href="{% url 'admin:logout' %}?next={{ request.path }}">Logoff</a></button>
+      <button class="btn btn-warning"><a href="{% url 'admin:logout' %}?next={{ request.path }}">Logoff</a></button>
 
-            <button class="btn btn-warning"><a href="{{ request.path }}?mode=">Exit Mode</a></button>
-        </div>
+      <button class="btn btn-warning"><a href="{{ request.path }}?mode=">Exit Mode</a></button>
+    </div>
 
-    {% else %}
+  {% else %}
 
-        <div id="editbar" class="btn-group">
-            <button class="btn btn-warning"><a href="{{ request.path }}?mode=edit">Edit Mode</a></button>
-        </div>
+    <div id="editbar" class="btn-group">
+      <button class="btn btn-warning"><a href="{{ request.path }}?mode=edit">Edit Mode</a></button>
+    </div>
 
-    {% endif %}
+  {% endif %}
 {% endif %}
