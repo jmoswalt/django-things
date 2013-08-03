@@ -34,16 +34,16 @@ class AllThingsFeed(Feed):
 
     def __init__(self):
         Feed.__init__(self)
-        self.all_items = []
         self.feed_for_item = {}
-        self.load_feeds_items()
 
     def load_feeds_items(self):
         """
         Combine subclasses to get combined feed
         """
+        self.all_items = []
         feeds = get_thing_subfeeds()
         for feed in feeds:
+            feed()
             feed_instance = feed()
             item_per_feed_cnt = 0
             for item in feed_instance.items():
@@ -54,6 +54,7 @@ class AllThingsFeed(Feed):
                     break
 
     def items(self):
+        self.load_feeds_items()
         sorted_items = sorted(self.all_items, key=lambda thing: thing[1], reverse=True)
         items = [i[0] for i in sorted_items]
         return items[:20]
@@ -89,6 +90,7 @@ def get_thing_subfeeds():
             __import__(".".join([app, "feeds"]))
         except ImportError:
             pass
+    ThingFeed.__subclasses__()
     return ThingFeed.__subclasses__()
 
 
