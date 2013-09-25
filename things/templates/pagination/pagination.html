@@ -11,12 +11,12 @@
   {% for page in pages %}
     {% if page %}
       {% ifequal page page_obj.number %}
-        <li class="current page active"><a href="#">{{ page }}</a></li>
+        <li class="current page active">{{ page }}</li>
       {% else %}
         <li><a href="/{{ current_url }}/{{ page }}/{{ getvars }}{{ hashtag }}" class="page">{{ page }}</a></li>
       {% endifequal %}
     {% else %}
-      <li class="disabled"><a href="#pager">...</a></li>
+      <li>...</li>
     {% endif %}
   {% endfor %}
   {% if page_obj.has_next %}

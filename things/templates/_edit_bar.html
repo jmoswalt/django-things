@@ -1,3 +1,4 @@
+{% comment %}
 {% if request.user.is_superuser %}
   {% if edit_mode %}
 
@@ -34,4 +35,37 @@
     </div>
 
   {% endif %}
+{% endif %}
+{% endcomment %}
+
+{% if request.user.is_superuser %}
+
+  <div id="editbar">
+    <div class="pure-menu pure-menu-open pure-menu-horizontal">
+      <ul>
+  {% if edit_mode %}
+
+        {% if object %}
+        <li><a href="{{ object.get_edit_url }}?next={{ request.path }}">Edit this {{ object.content_type.name|title }}</a></li>
+        {% endif %}
+
+        <li class="pure-menu-selected"><a href="/admin/">Admin</a></li>
+
+        {% if USE_STATIC_SITE %}
+        <li><a href="{% url 'deploy' %}">Rebuild Site</a></li>
+        {% endif %}
+
+        <li><a href="{% url 'admin:logout' %}?next={{ request.path }}">Logoff</a></li>
+        <li><a href="{{ request.path }}?mode=">Exit Mode</a></li>
+
+
+  {% else %}
+
+      <li><a href="{{ request.path }}?mode=edit">Edit Mode</a></li>
+
+  {% endif %}
+      </ul>
+    </div>
+  </div>
+
 {% endif %}

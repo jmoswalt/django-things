@@ -1,6 +1,17 @@
-#editbar { position: fixed; top: 0; right: 8%; z-index: 1100;}
+#editbar { position: fixed; top: 0; right: 8%; z-index: 1100; }
+#editbar .pure-menu { background-color: transparent; }
+#editbar a { padding: 2px 4px; font-size: .9em; line-height: 1.3em; }
 
-#editbar button a { color: #fafafa; }
+#editbar a,
+a.edit-link {background-color: rgba(80, 180, 220, .7) !important; color: rgb(255, 255, 255) !important; }
+
+#editbar a:hover,
+a.edit-link:hover { background-color: rgb(30, 120, 220) !important; text-decoration: none; }
+
+#editbar a:visited,
+a.edit-link:visited { color: rgb(255, 255, 255); }
+
+/*#editbar button a { color: #fafafa; }
 #editbar button a:hover { text-decoration: none; }
 
 #editbar .btn:first-child,
@@ -17,18 +28,23 @@
     -webkit-border-bottom-right-radius: 0px;
     -moz-border-radius-bottomright: 0px;
     border-bottom-right-radius: 0px;
-}
+}*/
 
 a.edit-link {
     position: absolute;
     top: 0;
-    left: -32px;
+    left: -18px;
     font-family: Verdana, sans-serif;
     display: block;
     font-weight: normal;
+    text-decoration: none;
+    text-transform: none;
+    font-size: 11px !important;
+    padding: 2px 3px !important;
+    letter-spacing: normal;
+    line-height: 13px !important;
+    border: none;
 }
-
-a.edit-link:visited { color: #fff; }
 
 .edit-parent {
     position: relative;
