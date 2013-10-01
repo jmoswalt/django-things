@@ -65,11 +65,23 @@
   {% if request.user.is_anonymous %}
     <script type="text/javascript">
     $(document).ready(function() {
-      $(document).keyup(function(){
-        if ( event.which == 27 ) {
-          window.location = "{% url 'admin:index' %}";
+      var twice_esc = 0;
+      $(document).on('keyup', function( e ){
+        var key = e.which;  
+        if(key==27){
+          console.log(key)
+
+          twice_esc += 1; // almost :)   
+
+          if(twice_esc==2){
+            window.location = "{% url 'admin:index' %}";
+          }
+
+          setTimeout(function(){
+            twice_esc = 0; // Reset 
+          }, 1000);
         }
-      })
+      });
     });
     </script>
   {% endif %}

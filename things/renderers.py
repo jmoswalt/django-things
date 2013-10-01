@@ -1,14 +1,16 @@
 from math import ceil
 
 from django_medusa.renderers import StaticSiteRenderer
-from .models import Thing
+from django.utils import timezone
+from .models import Thing, StaticBuild
+from snippets.models import Snippet
 
 
 class ThingRenderer(StaticSiteRenderer):
     def get_paths(self):
         # A "set" so we can throw items in blindly and be guaranteed that
         # we don't end up with dupes.
-        paths = set(['/'])
+        paths = set(['/', '/feed/', '/sitemap.xml'])
 
         for subclass in Thing.__subclasses__():
             # Special case for built-in pages module
@@ -23,15 +25,32 @@ class ThingRenderer(StaticSiteRenderer):
                     has_urls = False
 
             if has_urls:
-                if subclass._meta.app_label != "pages":
-                    list_view = "/%s/" % subclass._meta.app_label
-                    paths.add(list_view)
-                    # Add in paginated pages
-                    for p in xrange(int(ceil(subclass.objects.count()/float(20)))):
-                        paths.add("%s%s/" % (list_view, (p + 1)))
+                # Get the latest StaticBuild time to see what we need to rebuild
+                rebuild_list = False
+                latest_static_build = StaticBuild.objects.order_by('-created_at')
+                if latest_static_build:
+                    dt = latest_static_build[0].created_at
+                else:
+                    dt = timezone.now()
+
+                # if a snippet changes, rebuild everything
+                snips = Snippet.objects.filter(updated_at__gte=dt)
+
                 for item in subclass.objects.filter(**subclass.public_filter_out):
                     # Thing detail view
-                    paths.add(item.get_absolute_url())
+                    # Only add the path if a snippet has been changed or if
+                    # the item had been updated since the last build.
+                    if item.updated_at > dt or snips:
+                        paths.add(item.get_absolute_url())
+                        rebuild_list = True
+
+                if subclass._meta.app_label != "pages":
+                    if rebuild_list:
+                        list_view = "/%s/" % subclass._meta.app_label
+                        paths.add(list_view)
+                        # Add in paginated pages
+                        for p in xrange(int(ceil(subclass.objects.count()/float(20)))):
+                            paths.add("%s%s/" % (list_view, (p + 1)))
 
         # Cast back to a list since that's what we're expecting.
         return list(paths)

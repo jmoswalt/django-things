@@ -49,7 +49,7 @@
         <li><a href="{{ object.get_edit_url }}?next={{ request.path }}">Edit this {{ object.content_type.name|title }}</a></li>
         {% endif %}
 
-        <li class="pure-menu-selected"><a href="/admin/">Admin</a></li>
+        <li class="pure-menu-selected"><a href="/things/">Admin</a></li>
 
         {% if USE_STATIC_SITE %}
         <li><a href="{% url 'deploy' %}">Rebuild Site</a></li>

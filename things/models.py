@@ -264,3 +264,11 @@ class Data(models.Model):
     key = models.CharField(max_length=100, db_index=True)
     value = models.TextField()
     datatype = models.CharField(max_length=50, db_index=True)
+
+
+class StaticBuild(models.Model):
+    """
+    StaticBuild is a record of when a static build was made, so that
+    content that hasn't changed isn't rebuilt
+    """
+    created_at = models.DateTimeField(auto_now_add=True)
