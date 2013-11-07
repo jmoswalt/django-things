@@ -1,4 +1,5 @@
 import os
+import subprocess
 from dateutil.parser import parse
 
 from django.contrib.contenttypes.models import ContentType
@@ -223,6 +224,8 @@ class Thing(models.Model):
                     )
 
         clear_attr_cache(self)
+        if settings.USE_STATIC_SITE:
+            subprocess.Popen(["python", "manage.py", "rebuild_static_site"])
 
     def obj_type(self):
         return self.content_type().name

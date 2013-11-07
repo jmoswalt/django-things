@@ -176,7 +176,10 @@ AWS_ACCESS_KEY_ID = AWS_ACCESS_KEY
 AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY', '')
 AWS_STORAGE_BUCKET_NAME = env('AWS_STORAGE_BUCKET_NAME', '')
 STATIC_S3_PATH = "static"
-USE_STATIC_SITE = False
+FULL_STATIC_SITE = False
+USE_STATIC_SITE = env('USE_STATIC_SITE', False)
+if USE_STATIC_SITE:
+    FULL_STATIC_SITE = env('FULL_STATIC_SITE', False)
 
 
 # -------------------------------------- #
@@ -190,7 +193,6 @@ if all([AWS_ACCESS_KEY,
         AWS_STORAGE_BUCKET_NAME]):
     MEDUSA_RENDERER_CLASS = "django_medusa.renderers.S3StaticSiteRenderer"
     STATICFILES_STORAGE = 'things.s3_storages.StaticStorage'
-    USE_STATIC_SITE = env('USE_STATIC_SITE', USE_STATIC_SITE)
 else:
     MEDUSA_RENDERER_CLASS = "django_medusa.renderers.DiskStaticSiteRenderer"
     MEDUSA_DEPLOY_DIR = path.join(PROJECT_ROOT, 'html')
