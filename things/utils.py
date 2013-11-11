@@ -22,7 +22,7 @@ def get_thing_object_or_404(cls, slug, **kwargs):
 
 
 def handle_uploaded_file(obj, f):
-    internal_path = os.path.join(unicode("uploads"), unicode(obj.obj_type_plural().replace(' ', '_')), unicode(obj.pk))
+    internal_path = os.path.join(unicode("uploads"), unicode(obj.obj_type_plural().replace(' ', '_')), unicode(obj.id))
     folder_path = os.path.join(settings.MEDIA_ROOT, internal_path)
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
@@ -39,25 +39,14 @@ def handle_uploaded_file(obj, f):
 def get_thing_objects_qs(model, user=AnonymousUser()):
     public_filter_out = model.public_filter_out or {}
     super_user_order = model.super_user_order or ['-created_at']
-    public_order = model.public_order or ""
+    public_order = model.public_order or ['-created_at']
+    if type(public_order) == type(str()):
+        public_order = [public_order,]
 
     if user.is_superuser:
         queryset = model.objects.order_by(*super_user_order)
     else:
-        queryset = model.objects.filter(**public_filter_out)
-
-        if public_order:
-            if public_order.replace('-', '') in model.attrs_list():
-                if public_order[0] == "-":
-                    key = public_order[1:]
-                    value = '-datum__value'
-                else:
-                    key = public_order
-                    value = 'datum__value'
-
-                queryset = queryset.filter(datum__key=key).order_by(value)
-            else:
-                queryset = queryset.order_by(public_order)
+        queryset = model.objects.filter(**public_filter_out).order_by(*public_order)
 
     return queryset
 
@@ -76,11 +65,3 @@ def get_thing_object(model, slug, user=AnonymousUser()):
             **filters)
 
     return obj
-
-
-def clear_attr_cache(instance):
-    clear_keys = []
-    for key in instance.attrs_list():
-        clear_keys.append((".".join([settings.SITE_CACHE_KEY, '%s', str(instance.pk)]) % key))
-
-    cache.delete_many(clear_keys, None)

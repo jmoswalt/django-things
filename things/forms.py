@@ -11,6 +11,10 @@ class ThingForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(ThingForm, self).__init__(*args, **kwargs)
+        if 'id' in self.fields:
+            del self.fields['id']
+        if 'json' in self.fields:
+            del self.fields['json']
         if "content_type_id" in self.fields:
             if not self.instance.pk:
                 del self.fields['content_type_id']
@@ -24,6 +28,7 @@ class ThingForm(forms.ModelForm):
         for f in self.instance.attrs:
 
             key = f['key']
+            print key
             if key not in self.fields:
                 # Add the field to the form
                 if "form_field" in f:
@@ -74,10 +79,12 @@ class ThingForm(forms.ModelForm):
                         self.fields[key].help_text = f['description'].replace("{{ model }}", self.instance.obj_type().title())
                     else:
                         self.fields[key].help_text = f['description']
+                else:
+                    self.fields[key].help_text = "The %s of the %s" % (f['name'], self.instance.obj_type().title())
 
             # Grab the attribute and try to prepopulte the initial
             # if there is a value.
-            attr = getattr(self.instance, key)
+            attr = self.instance.get_val(f)
             if attr:
                 if f['datatype'] == TYPE_FOREIGNKEY:
                     attr = attr.pk
@@ -124,7 +131,7 @@ class ThingForm(forms.ModelForm):
 
             if 'editable' in f:
                 if not f['editable']:
-                    self.cleaned_data[key] = thing.get_value_of_attribute(f['key'])
+                    self.cleaned_data[key] = thing.get_val(f['key'])
 
             if key in self.cleaned_data and self.cleaned_data[key]:
                 thing.values[key] = self.cleaned_data[key]
