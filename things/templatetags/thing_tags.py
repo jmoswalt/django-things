@@ -1,3 +1,5 @@
+from dateutil.parser import parse
+
 from django.template import Library, Node, TemplateSyntaxError, Variable
 from django.template.defaultfilters import date
 from django.contrib.contenttypes.models import ContentType
@@ -19,7 +21,7 @@ def edit_link(obj):
 
 @register.simple_tag(takes_context=True)
 def thing_attr(context, attr):
-    value = getattr(context['object'], attr['key'])
+    value = context['object'].get_val(attr)
     if value:
         if attr['datatype'] == TYPE_DATE:
             return date(value, "SHORT_DATETIME_FORMAT")

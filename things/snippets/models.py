@@ -3,19 +3,17 @@ from things import attrs, types
 from .utils import clear_snippet_cache
 
 
-TEMPLATE_TEXT_ATTRIBUTES = (
-    {
-        "name": "HTML Allowed",
-        "key": "allow_html",
-        "description": "If this isn't checked, HTML will be stripped out of the {{ model }}.",
-        "datatype": types.TYPE_BOOLEAN,
-        "editable": False
-    },
-    attrs.CONTENT,
-)
-
-
 class Snippet(Thing):
+    cls_attrs = (
+        {
+            "name": "HTML Allowed",
+            "key": "allow_html",
+            "description": "If this isn't checked, HTML will be stripped out of the {{ model }}.",
+            "datatype": types.TYPE_BOOLEAN,
+            "editable": False
+        },
+        attrs.CONTENT,
+    )
 
     class Meta:
         proxy = True
@@ -25,4 +23,4 @@ class Snippet(Thing):
         clear_snippet_cache(self)
 
 
-register_thing(Snippet, TEMPLATE_TEXT_ATTRIBUTES)
+register_thing(Snippet)
