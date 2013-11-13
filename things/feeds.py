@@ -1,7 +1,6 @@
 from django.contrib.syndication.views import Feed
 from django.contrib.sitemaps import Sitemap
 from django.conf import settings
-from django.contrib.sites.models import Site
 from django.utils import timezone
 
 from .models import Thing
@@ -28,9 +27,9 @@ class ThingFeed(Feed):
 
 
 class AllThingsFeed(Feed):
-    title = "%s" % Site.objects.get_current().name
+    title = "Site Feed"
     link = "/feed/"
-    description = "Latest Content from http://%s/" % Site.objects.get_current().domain
+    description = "Latest Content from site"
 
     def __init__(self):
         Feed.__init__(self)
