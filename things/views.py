@@ -1,9 +1,13 @@
 import subprocess
+from csv import writer
+from datetime import datetime
 
 from django.views.generic import ListView, DetailView
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
+from django.contrib.contenttypes.models import ContentType
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
+from django.shortcuts import get_object_or_404
 
 from .utils import get_thing_object, get_thing_objects_qs
 
@@ -69,3 +73,43 @@ def static_build(request):
     messages.success(request, 'Static Build triggered')
 
     return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
+
+
+@staff_member_required
+def thing_export(request, ct_id):
+    """
+    Create a CSV export of all of the selected kind of Thing.
+    """
+    content_type = get_object_or_404(ContentType, id=ct_id)
+    response = HttpResponse(mimetype="text/csv")
+    csvname = "%ss_%s.csv" % (content_type.model, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    response["Content-Disposition"] = "attachment; filename=%s" % csvname
+    csv = writer(response)
+
+    default_columns = ['name', 'slug', 'created_at', 'updated_at', 'username']
+    columns = default_columns
+    all_things = content_type.model_class().objects.all().order_by('created_at')
+
+    if all_things:
+        fields = all_things[0].attrs_list()
+        for field in fields:
+            columns.append(field)
+        csv.writerow(columns)
+
+        for t in all_things:
+            row = []
+            row.append(t.name)
+            row.append(t.slug)
+            row.append(t.created_at.strftime("%Y-%m-%d %H:%M:%S"))
+            row.append(t.updated_at.strftime("%Y-%m-%d %H:%M:%S"))
+            row.append(getattr(t.creator, 'username', ''))
+
+            for field in fields:
+                row.append(getattr(t, field, ''))
+
+            for x in range(len(columns) - len(row)):
+                row.append('')
+
+            # Write out the row.
+            csv.writerow(row)
+    return response

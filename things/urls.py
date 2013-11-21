@@ -5,7 +5,8 @@ from django.views.decorators.cache import cache_page
 from django.views.generic import TemplateView
 
 from .pages.models import Page
-from .views import ThingListView, ThingDetailView, static_build
+
+from .views import ThingListView, ThingDetailView, static_build, thing_export
 from .feeds import AllThingsFeed, ThingSitemap
 
 admin.autodiscover()
@@ -20,6 +21,7 @@ urlpatterns = patterns(
         name='deploy'),
     url(r'^feed/$', AllThingsFeed(), name="feed_all"),
     url(r'^sitemap\.xml$', cache_page(3600)(sitemaps_views.sitemap), {'sitemaps': {'things': ThingSitemap}}),
+    url(r'^export/(?P<ct_id>\d+)/$', thing_export, name='things_export'),
 )
 
 def auto_app_url_patterns():
