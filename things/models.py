@@ -6,7 +6,9 @@ from jsonfield import JSONField
 
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse, clear_url_caches
+from django.utils.importlib import import_module
+from django.utils import timezone
 from django.core.files import File
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import models
@@ -119,17 +121,24 @@ class ThingManager(models.Manager):
         return thesuper.filter(*args, **new_kwargs)
 
 
-class Thing(models.Model):
+class ThingAbstract(models.Model):
     """A Thing is simply a name, slug, and an object type."""
 
-    id = models.CharField(max_length=64, unique=True, primary_key=True)
+    id = models.CharField(max_length=64, unique=True, primary_key=True, blank=True)
     name = models.CharField(max_length=200)
     slug = models.CharField(max_length=200, unique=True)
     json = JSONField(default={})
-    content_type_id = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    creator = models.ForeignKey(User, null=True)
+    creator = models.ForeignKey(User, null=True, blank=True)
+
+    class Meta:
+        abstract = True
+
+class Thing(ThingAbstract):
+    """A Thing is simply a name, slug, and an object type."""
+
+    content_type_id = models.IntegerField()
 
     objects = ThingManager()
     all_things = AllThingsManager()
@@ -196,7 +205,7 @@ class Thing(models.Model):
 
     @models.permalink
     def get_absolute_url(self):
-        return ("%s_detail" % self.obj_content_type().name.replace(' ', '_'), [self.slug])
+        return ("%s_detail" % self.obj_content_type().name.replace(' ', '_').lower(), [self.slug])
 
     @models.permalink
     def get_edit_url(self):
@@ -267,6 +276,10 @@ class Thing(models.Model):
 
         super(Thing, self).save(*args, **kwargs)
 
+        reload(import_module('things.admin'))
+        reload(import_module(settings.ROOT_URLCONF))
+        clear_url_caches()
+
         if settings.USE_STATIC_SITE:
             subprocess.Popen(["python", "manage.py", "rebuild_static_site"])
 
@@ -291,6 +304,61 @@ class Thing(models.Model):
         return self.default_order_field()
 
 
+class ThingType(ThingAbstract):
+    """An expansion on a Content Type that includes field definitions."""
+
+    # TODO: make this a one-to-one field
+    content_type_id = models.IntegerField(null=True, blank=True)
+
+    objects = models.Manager()
+
+    def __init__(self, *args, **kwargs):
+        super(ThingType, self).__init__(*args, **kwargs)
+        if not self.id:
+            self.id = str(uuid4())
+
+    def __unicode__(self):
+        if self.name:
+            return self.name
+        else:
+            return "%s" % self.pk
+
+    def save(self, *args, **kwargs):
+        if not self.content_type_id:
+            cts = ContentType.objects.filter(name=self.name, app_label='things')
+            if cts:
+                self.content_type_id = cts[0].id
+
+        # TODO: if name changes, update the ContentType with the new name
+
+        super(ThingType, self).save(*args, **kwargs)
+
+
+        #reload(import_module('things.admin'))
+        from .admin import load_admin_mods
+        for mod in load_models():
+            load_admin_mods(mod)
+        reload(import_module(settings.ROOT_URLCONF))
+        clear_url_caches()
+
+
+class ThingMeta(object):
+    """
+    Proxy meta class to use to create dynamic models.
+
+    This class sets proxy to be True and sets other attributes
+    that are passed in the instantiation. Only certain keys are
+    accepted.
+    """
+    proxy = True
+
+    def __init__(self, *args, **kwargs):
+        keys = ['verbose_name', 'verbose_name_plural', 'ordering']
+        for k, v in kwargs.items():
+            if k in keys:
+                setattr(self, k, v)
+
+
 def register_thing(cls, attrs=None, ct=None):
     if hasattr(cls, 'cls_attrs'):
         ats = cls.cls_attrs
@@ -298,7 +366,60 @@ def register_thing(cls, attrs=None, ct=None):
         ats = attrs
     setattr(cls, 'attrs', ats)
     for a in ats:
-        setattr(cls, a['key'], '')
+        if 'key' in a:
+            setattr(cls, a['key'], '')
+
+
+def load_models():
+    from .attrs import CONTENT, AUTHOR, PUBLISHED_AT, FEATURED
+    new_classes = []
+
+    mods = ThingType.objects.all()
+    if not mods:
+        example_type = ThingType()
+        example_type.name = "Note"
+        example_type.slug = 'notes'
+        example_type.json = {
+            'fields': (
+            CONTENT,
+            AUTHOR,
+            PUBLISHED_AT,
+            FEATURED,
+            {
+                "name": "Category",
+                "key": "category",
+                "description": "Add a Category to the {{ model }}.",
+                "datatype": TYPE_TEXT,
+                "required": False
+            }
+            ),
+            'meta': {'verbose_name': 'Note'}
+        }
+        example_type.save()
+        mods = ThingType.objects.all()
+
+    for mod in mods:
+        meta = mod.json.get('meta', {})
+        new_class = type(str(mod.name), (Thing,), {
+            '__module__': 'things.models',
+            'Meta': ThingMeta(**meta),
+            'public_filter_out': {
+                'published_at__gte': 0,
+                'published_at__lte': timezone.now()
+                },
+            'super_user_order': ['-published_at', '-created_at'],
+            'public_order': "-published_at",
+        })
+
+        register_thing(new_class, attrs=mod.json['fields'])
+        new_classes.append(new_class)
+
+    return new_classes
+
+try:
+    load_models()
+except ImportError:
+    print "models did not load"
 
 
 class StaticBuild(models.Model):

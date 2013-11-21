@@ -8,6 +8,7 @@ from django.forms.models import ModelForm
 
 from .types import *
 from .forms import ThingForm
+from .models import ThingType, load_models
 
 
 class ThingListFilter(SimpleListFilter):
@@ -81,11 +82,11 @@ class ThingAdmin(admin.ModelAdmin):
         return truncate_words(strip_tags(obj.content), 15)
 
     def private(self, obj):
-        return obj.private
+        return bool(obj.private)
     private.boolean = True
 
     def featured(self, obj):
-        return obj.featured
+        return bool(obj.featured)
     featured.boolean = True
 
     def image(self, obj):
@@ -137,3 +138,18 @@ class ThingAdmin(admin.ModelAdmin):
 
         super_meth = super(ThingAdmin, self).render_change_form
         return super_meth(request, context, add, change, form_url, obj)
+
+try:
+    admin.site.register(ThingType, admin.ModelAdmin)
+except admin.sites.AlreadyRegistered:
+    pass
+
+def load_admin_mods(mod):
+    try:
+        admin.site.register(mod, ThingAdmin)
+    except admin.sites.AlreadyRegistered:
+        admin.site.unregister(mod)
+        admin.site.register(mod, ThingAdmin)
+
+for mod in load_models():
+    load_admin_mods(mod)
