@@ -28,7 +28,6 @@ class ThingForm(forms.ModelForm):
         for f in self.instance.attrs:
 
             key = f['key']
-            print key
             if key not in self.fields:
                 # Add the field to the form
                 if "form_field" in f:
