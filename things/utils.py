@@ -1,10 +1,11 @@
 import os
 
 from django.http import Http404
-from django.core.cache import cache
 from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
 from django.shortcuts import get_object_or_404
+from django.contrib import admin
+from django.core.urlresolvers import clear_url_caches
 
 
 def get_thing_object_or_404(cls, slug, **kwargs):
@@ -65,3 +66,58 @@ def get_thing_object(model, slug, user=AnonymousUser()):
             **filters)
 
     return obj
+
+
+
+def load_models(msg=None):
+    from .attrs import CONTENT, AUTHOR, PUBLISHED_AT, FEATURED
+    from .types import TYPE_TEXT
+    from .models import ThingType, register_thing
+    from .admin import ThingAdmin
+    new_classes = []
+
+    # Add try in case ThingType table has not been created
+    try:
+        mods = ThingType.objects.all()
+        len(mods)
+    except:
+        return None
+
+    if not mods:
+        example_type = ThingType()
+        example_type.name = "Note"
+        example_type.slug = 'notes'
+        example_type.json = {
+            'fields': (
+            CONTENT,
+            AUTHOR,
+            PUBLISHED_AT,
+            FEATURED,
+            {
+                "name": "Category",
+                "key": "category",
+                "description": "Add a Category to the {{ model }}.",
+                "datatype": TYPE_TEXT,
+                "required": False
+            }
+            )
+        }
+
+        example_type.save()
+        mods = ThingType.objects.all()
+
+    for mod in mods:
+        new_class = mod.get_class()
+
+        register_thing(new_class, attrs=mod.json['fields'])
+        try:
+            admin.site.register(new_class, ThingAdmin)
+        except admin.sites.AlreadyRegistered:
+            admin.site.unregister(new_class)
+            admin.site.register(new_class, ThingAdmin)
+
+        new_classes.append(new_class)
+
+    clear_url_caches()
+
+    return new_classes

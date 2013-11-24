@@ -1,6 +1,0 @@
-<h2><a href="{{ object.get_absolute_url }}">{{ object.name }}</a></h2>
-<p>By: {{ object.author }}</p>
-<p>Category: {{ object.category }}</p>
-<p>{{ object.content|safe|truncatewords_html:"40" }}</p>
-<p>Published at: {{ object.published_at|date:"m/d/Y h:i a" }}</p>
-{% include "_edit_link.html" %}

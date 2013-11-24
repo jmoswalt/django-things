@@ -4,10 +4,10 @@ import subprocess
 from dateutil.parser import parse
 from jsonfield import JSONField
 
+from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User
-from django.core.urlresolvers import reverse, clear_url_caches
-from django.utils.importlib import import_module
+from django.core.urlresolvers import reverse, NoReverseMatch
 from django.utils import timezone
 from django.core.files import File
 from django.core.files.uploadedfile import InMemoryUploadedFile
@@ -15,7 +15,7 @@ from django.db import models
 from django.conf import settings
 
 from .types import *
-from .utils import handle_uploaded_file
+from .utils import handle_uploaded_file, load_models
 
 # Postgres want's a valid date for an empty datefield in json
 # so the date below is used at the "empty" datetime
@@ -152,7 +152,7 @@ class Thing(ThingAbstract):
         super(Thing, self).__init__(*args, **kwargs)
         if not self.id:
             self.id = str(uuid4())
-        if self.attrs and isinstance(self.attrs, tuple):
+        if hasattr(self, 'attrs'):
             for f in self.attrs:
                 setattr(self, f['key'], self.get_val(f))
 
@@ -166,9 +166,9 @@ class Thing(ThingAbstract):
     def content_type(cls):
         return ContentType.objects.get_for_model(cls, for_concrete_model=False)
 
-    @classmethod
-    def attrs(cls):
-        return cls.attrs
+    # @classmethod
+    # def attrs(cls):
+    #     return cls.attrs
 
     @classmethod
     def extra_apps(cls):
@@ -196,9 +196,12 @@ class Thing(ThingAbstract):
         return [k['key'] for k in cls.attrs]
 
     @classmethod
-    def get_add_url(cls):
+    def admin_url(cls):
         ct = cls.content_type()
-        return reverse("admin:%s_%s_add" % (ct.app_label, ct.name))
+        try:
+            return reverse("admin:%s_%s_changelist" % (ct.app_label, ct.name))
+        except NoReverseMatch:
+            return ''
 
     def obj_content_type(self):
         return self.content_type()
@@ -212,7 +215,21 @@ class Thing(ThingAbstract):
         ct = self.obj_content_type()
         return ("admin:%s_%s_change" % (ct.app_label, ct.name), [self.pk])
 
+    def get_val_from_key(self, key):
+        for attr in self.attrs:
+            if attr['key'] == key:
+                return self.get_val(attr)
+        return None
+
+    def get_attr_from_key(self, key):
+        for attr in self.attrs:
+            if attr['key'] == key:
+                return attr
+        return None
+
     def get_val(self, f):
+        if not self.json:
+            return ''
         val = self.json.get(f['key'], None)
 
         if f['datatype'] == TYPE_DATE:
@@ -255,7 +272,10 @@ class Thing(ThingAbstract):
     def save(self, *args, **kwargs):
         if not self.content_type_id:
             self.content_type_id = self.content_type().pk
-        values = getattr(self, 'values')
+        try:
+            values = getattr(self, 'values')
+        except AttributeError:
+            values = None
         if values:
             for f in self.attrs:
                 # Handle uploaded file fields
@@ -276,10 +296,6 @@ class Thing(ThingAbstract):
 
         super(Thing, self).save(*args, **kwargs)
 
-        reload(import_module('things.admin'))
-        reload(import_module(settings.ROOT_URLCONF))
-        clear_url_caches()
-
         if settings.USE_STATIC_SITE:
             subprocess.Popen(["python", "manage.py", "rebuild_static_site"])
 
@@ -296,7 +312,10 @@ class Thing(ThingAbstract):
         return self._meta.verbose_name_plural
 
     def default_order_field(self):
-        return self.get_val(self.attr_obj(self.public_order.replace('-', ''))) or getattr(self, self.public_order.replace('-', '')) or parse(ZERO_DATE)
+        field = self.public_order.replace('-', '')
+        if field in self.attrs_list():
+            return self.get_val(self.attr_obj(field)) or parse(ZERO_DATE)
+        return getattr(self, field)
 
     def published_field(self):
         if self.default_order_field() == parse(ZERO_DATE):
@@ -309,6 +328,8 @@ class ThingType(ThingAbstract):
 
     # TODO: make this a one-to-one field
     content_type_id = models.IntegerField(null=True, blank=True)
+    list_template = models.TextField(blank=True)
+    detail_template = models.TextField(blank=True)
 
     objects = models.Manager()
 
@@ -323,6 +344,27 @@ class ThingType(ThingAbstract):
         else:
             return "%s" % self.pk
 
+    def get_class(self):
+        meta = {'verbose_name': str(self.name)}
+        return type(str(self.name), (Thing,), {
+            '__module__': 'things.models',
+            'Meta': ThingMeta(**meta),
+            'public_filter_out': {
+                'published_at__gte': 0,
+                'published_at__lte': timezone.now()
+                },
+            'super_user_order': ['-created_at', '-updated_at'],
+            'public_order': "-created_at",
+        })
+
+    def save_template(self, template_name, field):
+        folder_path = os.path.join(settings.THEME_PATH, "templates", "things")
+        file_path = os.path.join(folder_path, "%s_%s.html" % (self.get_class()._meta.verbose_name.lower(), template_name))
+        if not os.path.exists(folder_path):
+            os.makedirs(folder_path)
+        with open(file_path, 'wb+') as destination:
+            destination.write(getattr(self, field))
+
     def save(self, *args, **kwargs):
         if not self.content_type_id:
             cts = ContentType.objects.filter(name=self.name, app_label='things')
@@ -333,14 +375,12 @@ class ThingType(ThingAbstract):
 
         super(ThingType, self).save(*args, **kwargs)
 
+        if self.list_template:
+            self.save_template('list', 'list_template')
+        if self.detail_template:
+            self.save_template('detail', 'detail_template')
 
-        #reload(import_module('things.admin'))
-        from .admin import load_admin_mods
-        for mod in load_models():
-            load_admin_mods(mod)
-        reload(import_module(settings.ROOT_URLCONF))
-        clear_url_caches()
-
+        load_models(msg="Saving a Thing Type")
 
 class ThingMeta(object):
     """
@@ -368,58 +408,6 @@ def register_thing(cls, attrs=None, ct=None):
     for a in ats:
         if 'key' in a:
             setattr(cls, a['key'], '')
-
-
-def load_models():
-    from .attrs import CONTENT, AUTHOR, PUBLISHED_AT, FEATURED
-    new_classes = []
-
-    mods = ThingType.objects.all()
-    if not mods:
-        example_type = ThingType()
-        example_type.name = "Note"
-        example_type.slug = 'notes'
-        example_type.json = {
-            'fields': (
-            CONTENT,
-            AUTHOR,
-            PUBLISHED_AT,
-            FEATURED,
-            {
-                "name": "Category",
-                "key": "category",
-                "description": "Add a Category to the {{ model }}.",
-                "datatype": TYPE_TEXT,
-                "required": False
-            }
-            ),
-            'meta': {'verbose_name': 'Note'}
-        }
-        example_type.save()
-        mods = ThingType.objects.all()
-
-    for mod in mods:
-        meta = mod.json.get('meta', {})
-        new_class = type(str(mod.name), (Thing,), {
-            '__module__': 'things.models',
-            'Meta': ThingMeta(**meta),
-            'public_filter_out': {
-                'published_at__gte': 0,
-                'published_at__lte': timezone.now()
-                },
-            'super_user_order': ['-published_at', '-created_at'],
-            'public_order': "-published_at",
-        })
-
-        register_thing(new_class, attrs=mod.json['fields'])
-        new_classes.append(new_class)
-
-    return new_classes
-
-try:
-    load_models()
-except ImportError:
-    print "models did not load"
 
 
 class StaticBuild(models.Model):

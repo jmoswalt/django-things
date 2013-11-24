@@ -1,0 +1,6 @@
+{% extends 'admin:admin/index.html' %}
+
+{% block sidebar %}
+  <div style="float: right; width: 18em; position: relative; margin-right: -19em; margin-top: -2em"><button style="width: 100%; padding: 4px 10px; background-color: rgb(65, 118, 144); color: #fff; border: none; font-weight: bold; cursor: pointer;" onclick="location.href='{% url 'things_import' %}';">Import Content</button></div>
+  {{ block.super }}
+{% endblock %}

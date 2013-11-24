@@ -8,3 +8,6 @@ def get_version():
     return version
 
 __version__ = get_version()
+
+from .utils import load_models
+load_models()

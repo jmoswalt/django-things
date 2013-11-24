@@ -5,10 +5,12 @@ from django.utils.safestring import mark_safe
 from django.utils.text import truncate_words
 from django.utils.html import strip_tags
 from django.forms.models import ModelForm
+from django.core.urlresolvers import reverse, NoReverseMatch
 
 from .types import *
-from .forms import ThingForm
-from .models import ThingType, load_models
+from .attrs import *
+from .forms import ThingForm, ThingTypeForm
+from .models import ThingType
 
 
 class ThingListFilter(SimpleListFilter):
@@ -45,6 +47,63 @@ class PrivateListFilter(ThingListFilter):
     parameter_name = 'private'
 
 
+class ThingTypeAdmin(admin.ModelAdmin):
+    list_display = ('name', 'count', 'list_link', 'add_link', 'import_type', 'export_type')
+    prepopulated_fields = {'slug': ['name']}
+    form = ThingTypeForm
+    fields = [
+        'name',
+        'slug',
+        'json',
+        'creator',
+        'list_template',
+        'detail_template',
+    ]
+
+    def count(self, obj):
+        return obj.get_class().objects.all().count()
+
+    def list_link(self, obj):
+        try:
+            link = '<a href="%s" title="View list of items">View List of items</a>' % (
+                reverse("admin:things_%s_changelist" % (obj.get_class()._meta.verbose_name.lower())),
+            )
+        except NoReverseMatch:
+            link = ''
+        return link
+    list_link.allow_tags = True
+
+    def add_link(self, obj):
+        try:
+            link = '<a href="%s" title="Add list of items">Add List of items</a>' % (
+                reverse("admin:things_%s_add" % (obj.get_class()._meta.verbose_name.lower())),
+            )
+        except NoReverseMatch:
+            link = ''
+        return link
+    add_link.allow_tags = True
+
+    def import_type(self, obj):
+        link = '<a href="%s?ct=%s">Import %s</a>' % (
+            reverse("things_import"),
+            obj.get_class().content_type().pk,
+            obj.get_class()._meta.verbose_name_plural.lower(),
+        )
+        return link
+    import_type.allow_tags = True
+
+    def export_type(self, obj):
+        if obj.get_class().content_type():
+            link = '<a href="%s">Export all %s</a>' % (
+                reverse("things_export", kwargs={'ct_id': obj.get_class().content_type().pk}),
+                obj.get_class()._meta.verbose_name_plural.lower(),
+            )
+        else:
+            link = ''
+        return link
+    export_type.allow_tags = True
+
+
 class ThingAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ['name']}
     search_fields = ['name', 'slug']
@@ -79,14 +138,14 @@ class ThingAdmin(admin.ModelAdmin):
     # for fields in things.attrs
     # --------------------------------- #
     def content(self, obj):
-        return truncate_words(strip_tags(obj.content), 15)
+        return truncate_words(strip_tags(obj.get_val(CONTENT)), 15)
 
     def private(self, obj):
-        return bool(obj.private)
+        return bool(obj.get_val(PRIVATE))
     private.boolean = True
 
     def featured(self, obj):
-        return bool(obj.featured)
+        return bool(obj.get_val(FEATURED))
     featured.boolean = True
 
     def image(self, obj):
@@ -139,17 +198,8 @@ class ThingAdmin(admin.ModelAdmin):
         super_meth = super(ThingAdmin, self).render_change_form
         return super_meth(request, context, add, change, form_url, obj)
 
+
 try:
-    admin.site.register(ThingType, admin.ModelAdmin)
+    admin.site.register(ThingType, ThingTypeAdmin)
 except admin.sites.AlreadyRegistered:
     pass
-
-def load_admin_mods(mod):
-    try:
-        admin.site.register(mod, ThingAdmin)
-    except admin.sites.AlreadyRegistered:
-        admin.site.unregister(mod)
-        admin.site.register(mod, ThingAdmin)
-
-for mod in load_models():
-    load_admin_mods(mod)

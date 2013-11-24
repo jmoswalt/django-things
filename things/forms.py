@@ -4,7 +4,19 @@ from django.contrib.admin.widgets import AdminSplitDateTime
 from redactor.widgets import RedactorEditor
 
 from .types import *
-from .models import Thing
+from .models import Thing, ThingType
+
+
+class ThingTypeForm(forms.ModelForm):
+    model = ThingType
+    fields = [
+        'name',
+        'slug',
+        'json',
+        'creator',
+        'list_template',
+        'detail_template',
+    ]
 
 
 class ThingForm(forms.ModelForm):
@@ -135,3 +147,16 @@ class ThingForm(forms.ModelForm):
             if key in self.cleaned_data and self.cleaned_data[key]:
                 thing.values[key] = self.cleaned_data[key]
         return thing
+
+
+class ThingImportForm(forms.Form):
+    """Form used for importing new things."""
+
+    thing_type = forms.CharField(required=False, label="Thing Type")
+    thing_type_name = forms.CharField(label="Type Name", required=False, help_text='Singular name, like "Article"')
+    upload_file = forms.FileField(label='File', required=True)
+
+    def __init__(self, *args, **kwargs):
+        super(ThingImportForm, self).__init__(*args, **kwargs)
+        choices = [('', '---')] + [(i.content_type().pk, i.content_type().name.title()) for i in Thing.__subclasses__()]
+        self.fields['thing_type'] = forms.ChoiceField(required=False, choices=choices, label="Thing Type", initial=None)
