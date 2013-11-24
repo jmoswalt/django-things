@@ -1,0 +1,21 @@
+{% extends "admin/base_site.html" %}
+{% load i18n l10n %}
+{% load admin_urls %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+&rsaquo; {% trans 'Import content' %}
+</div>
+{% endblock %}
+
+{% block content %}
+
+<h2>Import New Content</h2>
+<p>Pick either an existing type, or name the new type</p>
+<form enctype="multipart/form-data" action="." method="post">{% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="{% trans "Run the import" %}" />
+</form>
+
+{% endblock %}

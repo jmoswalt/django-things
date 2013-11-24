@@ -9,7 +9,7 @@
   <h1>{{ object.name }}</h1>
 
   {% for attr in object.attrs %}
-    <p>{{ attr.name }}: {% thing_attr attr %}</p>
+    <p>{{ attr.name }}: {{ object|val:attr.key|safe }}</p>
   {% endfor %}
 
 {% endblock content %}

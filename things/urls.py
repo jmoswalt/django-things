@@ -2,10 +2,10 @@ from django.conf.urls import patterns, url, include
 from django.contrib.sitemaps import views as sitemaps_views
 from django.contrib import admin
 from django.views.decorators.cache import cache_page
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, base
 
 from .pages.models import Page
-from .views import ThingListView, ThingDetailView, static_build, thing_export
+from .views import ThingListView, ThingDetailView, ThingImportView, static_build, thing_export
 from .feeds import AllThingsFeed, ThingSitemap
 
 admin.autodiscover()
@@ -13,7 +13,9 @@ admin.autodiscover()
 urlpatterns = patterns(
     '',
     url(r'^$', TemplateView.as_view(template_name='home.html'), name='home'),
+    url(r'^things/import/$', ThingImportView.as_view(), name='things_import'),
     url(r'^things/', include(admin.site.urls)),
+    url(r'^accounts/login/$', base.RedirectView.as_view(), {'url': '/'}),
     url(r'^redactor/', include('redactor.urls')),
     url(r'^deploy/$',
         static_build,

@@ -11,7 +11,7 @@
         <button class="btn btn-success dropdown-toggle" data-toggle="dropdown">Add <span class="caret"></span></button>
         <ul class="dropdown-menu">
           {% for app in CONTENT_APPS %}
-          <li><a href="{{ app.get_add_url }}?next={{ request.path }}">Add {{ app.obj_type|title }}</a></li>
+          <li><a href="{{ app.admin_add_url }}?next={{ request.path }}">Add {{ app.obj_type|title }}</a></li>
           {% endfor %}
         </ul>
       </div>

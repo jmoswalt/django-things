@@ -3,7 +3,10 @@
 {% load admin_urls %}
 
 {% block object-tools-items %}
+    {% if cl.model.content_type.pk %}
+    <li><a href="{% url 'things_import' %}?ct={{ cl.model.content_type.pk }}">Import {{ cl.opts.verbose_name_plural }}</a></li>
     <li><a href="{% url 'things_export' cl.model.content_type.pk %}">Export all {{ cl.opts.verbose_name_plural }}</a></li>
+    {% endif %}
     <li>
       <a href="{% url cl.opts|admin_urlname:'add' %}{% if is_popup %}?_popup=1{% endif %}" class="addlink">
         {% blocktrans with cl.opts.verbose_name as name %}Add {{ name }}{% endblocktrans %}

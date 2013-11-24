@@ -1,15 +1,24 @@
 import subprocess
-from csv import writer
+import json
+from dateutil.parser import parse
 from datetime import datetime
 
-from django.views.generic import ListView, DetailView
+from django.template.defaultfilters import slugify
+from django.views.generic import ListView, DetailView, FormView
 from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
 from django.shortcuts import get_object_or_404
+from django.core.urlresolvers import reverse, NoReverseMatch
+from django.utils import timezone
+
+from braces.views import StaffuserRequiredMixin
 
 from .utils import get_thing_object, get_thing_objects_qs
+from .forms import ThingImportForm
+from .models import ThingType, Thing
+from .types import TYPE_TEXT
 
 
 class ThingDetailView(DetailView):
@@ -78,38 +87,131 @@ def static_build(request):
 @staff_member_required
 def thing_export(request, ct_id):
     """
-    Create a CSV export of all of the selected kind of Thing.
+    Create a JSON export of all of the selected kind of Thing.
     """
     content_type = get_object_or_404(ContentType, id=ct_id)
-    response = HttpResponse(mimetype="text/csv")
-    csvname = "%ss_%s.csv" % (content_type.model, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-    response["Content-Disposition"] = "attachment; filename=%s" % csvname
-    csv = writer(response)
-
-    default_columns = ['name', 'slug', 'created_at', 'updated_at', 'username']
-    columns = default_columns
+    filename = "%ss_%s.json" % (content_type.model, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    items = []
     all_things = content_type.model_class().objects.all().order_by('created_at')
 
     if all_things:
         fields = all_things[0].attrs_list()
-        for field in fields:
-            columns.append(field)
-        csv.writerow(columns)
+        # for field in fields:
+        #     columns.append(field)
+        # csv_file.writerow(columns)
 
         for t in all_things:
-            row = []
-            row.append(t.name)
-            row.append(t.slug)
-            row.append(t.created_at.strftime("%Y-%m-%d %H:%M:%S"))
-            row.append(t.updated_at.strftime("%Y-%m-%d %H:%M:%S"))
-            row.append(getattr(t.creator, 'username', ''))
+            row = {}
+            row['name'] = t.name
+            row['slug'] = t.slug
+            row['created_at'] = t.created_at.strftime("%Y-%m-%d %H:%M:%S")
+            row['updated_at'] = t.updated_at.strftime("%Y-%m-%d %H:%M:%S")
+            row['username'] = getattr(t.creator, 'username', '')
 
             for field in fields:
-                row.append(getattr(t, field, ''))
+                val = getattr(t, field, '')
+                if type(val) == datetime:
+                    val = val.strftime("%Y-%m-%d %H:%M:%S")
+                row[field] = val
+            items.append(row)
 
-            for x in range(len(columns) - len(row)):
-                row.append('')
+    response = HttpResponse(json.dumps(items), mimetype='application/json')
+    response["Content-Disposition"] = "attachment; filename=%s" % filename
 
-            # Write out the row.
-            csv.writerow(row)
     return response
+
+
+class ThingImportView(StaffuserRequiredMixin, FormView):
+    template_name = 'admin/import.html'
+    form_class = ThingImportForm
+
+    # def get_context_data(self, **kwargs):
+    #     context = super(ThingImportView, self).get_context_data(**kwargs)
+
+    #     return context
+
+    def form_valid(self, form):
+        hard_keys = ['name', 'slug', 'created_at', 'updated_at', 'username']
+        add_count = 0
+        found_count = 0
+
+        upload_file = form.cleaned_data['upload_file']
+        data = json.load(upload_file)
+
+        if form.cleaned_data['thing_type']:
+            type_msg = "type"
+            model = ContentType.objects.get(pk=form.cleaned_data['thing_type']).model_class()
+        elif form.cleaned_data['thing_type_name']:
+            type_msg = "new type"
+            new_type = ThingType()
+            new_type.name = form.cleaned_data['thing_type_name']
+            new_type.slug = slugify(form.cleaned_data['thing_type_name'])
+            new_type.creator = self.request.user
+            new_type_fields = []
+            for k in data[0].keys():
+                if k not in hard_keys:
+                    new_type_fields.append({
+                        'name': k,
+                        'key': slugify(k),
+                        'datatype': TYPE_TEXT
+                    })
+
+            new_type.json = {
+                'fields': new_type_fields,
+                'meta': {'verbose_name': new_type.name}
+                }
+            new_type.save()
+            model = new_type.get_class()
+
+        for d in data:
+            new_item = {}
+            new_item['name'] = d['name']
+            new_item['content_type_id'] = model.content_type().pk
+            new_item['slug'] = d.get('slug', slugify(new_item['name']))
+
+            try:
+                i = 0
+                exists = True
+                original_slug = new_item['slug']
+                while exists:
+                    if i == 0:
+                        slug = original_slug
+                    else:
+                        slug = original_slug + str(i)
+                    new_item['slug'] = slug
+                    exists = Thing.all_things.get(slug=slug)
+                    if exists:
+                        i = i + 1
+            except Thing.DoesNotExist:
+                pass
+
+            item, created = model.objects.get_or_create(**new_item)
+            if created:
+                add_count = add_count + 1
+                item.creator = self.request.user
+                if 'created_at' in d: item.created_at = timezone.make_aware(parse(d['created_at']), timezone.utc)
+                if 'updated_at' in d: item.updated_at = timezone.make_aware(parse(d['updated_at']), timezone.utc)
+
+                item_json = {}
+                for k in d.keys():
+                    if k not in hard_keys:
+                        item_json[k] = d[k]
+                item.json = item_json
+                item.save()
+            else:
+                found_count = found_count + 1
+
+        messages.success(self.request, 'Successfully imported to %s "%s". %s added, %s already found (not updated).' % (type_msg, model._meta.verbose_name_plural.lower(), add_count, found_count))
+
+        try:
+            self.success_url = reverse("admin:%s_%s_changelist" % (model._meta.app_label, model._meta.verbose_name.lower()))
+        except NoReverseMatch:
+            pass
+        return super(ThingImportView, self).form_valid(form)
+
+    def get_success_url(self):
+        if 'next' in self.request.GET:
+            return self.request.GET['next']
+        if self.success_url:
+            return self.success_url
+        return reverse('admin:index')
