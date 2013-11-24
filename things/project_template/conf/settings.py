@@ -106,6 +106,7 @@ TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
     # 'django.template.loaders.eggs.Loader',
+    'apptemplates.Loader',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -115,7 +116,8 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django.contrib.redirects.middleware.RedirectFallbackMiddleware',
+    #'django.contrib.redirects.middleware.RedirectFallbackMiddleware',
+    'reredirects.middleware.ReRedirectFallbackMiddleware',
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (
@@ -139,15 +141,16 @@ INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
-    'django.contrib.sites',
+    #'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.markup',
     'django.contrib.staticfiles',
-    'django.contrib.redirects',
+    #'django.contrib.redirects',
     'django.contrib.sitemaps',
 
     'storages',
     'django_medusa',
+    'reredirects',
 
     'things',
     'things.pages',
@@ -160,9 +163,10 @@ INSTALLED_APPS = (
 THINGS_APPS = ()
 
 # Load apps from local "apps" folder in project
-THINGS_APPS += tuple(app for app in listdir(APPS_ROOT))
+if path.exists(APPS_ROOT):
+    THINGS_APPS += tuple(app for app in listdir(APPS_ROOT))
 
-INSTALLED_APPS += THINGS_APPS
+    INSTALLED_APPS += THINGS_APPS
 
 
 # -------------------------------------- #
@@ -187,6 +191,7 @@ if USE_STATIC_SITE:
 # -------------------------------------- #
 
 MEDUSA_MULTITHREAD = False
+MEDUSA_DEPLOY_DIR = False
 
 if all([AWS_ACCESS_KEY,
         AWS_SECRET_ACCESS_KEY,
