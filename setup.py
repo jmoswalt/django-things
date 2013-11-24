@@ -56,7 +56,7 @@ setup(
         'boto==2.6.0',
         'Markdown==2.3.1',
         'Pillow==2.0.0',
-        'django-reredirects'
+        'django-reredirects',
         'django-apptemplates==0.0.1',
         'xlrd==0.9.2',
         'django-braces==1.2.2',
