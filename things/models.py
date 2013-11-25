@@ -116,7 +116,9 @@ class ThingManager(models.Manager):
                     thesuper = thesuper.extra(where=[st])
                 else:
                     # Include 'real' field kwargs in the normal way
-                    new_kwargs[k] = v
+                    # If it's one of the known fields
+                    if k in [f.name for f in self.model._meta.fields]:
+                        new_kwargs[k] = v
 
         return thesuper.filter(*args, **new_kwargs)
 
@@ -355,6 +357,17 @@ class ThingType(ThingAbstract):
                 },
             'super_user_order': ['-created_at', '-updated_at'],
             'public_order': "-created_at",
+        })
+
+    def get_feed_class(self):
+        from .feeds import ThingFeed
+        #meta = {'verbose_name': str(self.name)}
+        return type(str(self.name), (ThingFeed,), {
+            '__module__': 'things.feeds',
+            #'Meta': ThingMeta(**meta),
+            'item_pubdate': lambda x,y: y.get_val_from_key(y.public_order.replace('-', '')),
+            'item_description': lambda x,y: getattr(y, 'content', y.name),
+            'model': self.get_class()
         })
 
     def save_template(self, template_name, field):

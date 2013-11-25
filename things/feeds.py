@@ -1,9 +1,10 @@
+from datetime import datetime
 from django.contrib.syndication.views import Feed
 from django.contrib.sitemaps import Sitemap
 from django.conf import settings
 from django.utils import timezone
 
-from .models import Thing
+from .models import Thing, ThingType
 from .utils import get_thing_objects_qs
 
 
@@ -47,7 +48,11 @@ class AllThingsFeed(Feed):
             item_per_feed_cnt = 0
             for item in feed_instance.items():
                 self.feed_for_item[item] = feed_instance
-                self.all_items.append((item, timezone.make_aware(self.item_pubdate(item), timezone.utc)))
+                if self.item_pubdate(item) == datetime:
+                    val = timezone.make_aware(self.item_pubdate(item), timezone.utc)
+                else:
+                    val = self.item_pubdate(item)
+                self.all_items.append((item, val))
                 item_per_feed_cnt += 1
                 if item_per_feed_cnt >= 20:
                     break
@@ -89,6 +94,8 @@ def get_thing_subfeeds():
             __import__(".".join([app, "feeds"]))
         except ImportError:
             pass
+    for thing_type in ThingType.objects.all():
+        thing_type.get_feed_class()
     ThingFeed.__subclasses__()
     return ThingFeed.__subclasses__()
 

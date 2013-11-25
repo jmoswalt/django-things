@@ -17,7 +17,7 @@
 #    along with Django-things.  If not, see <http://gnu.org/licenses/>.
 from setuptools import setup, find_packages
 
-VERSION = (0, 4, 0)
+VERSION = (0, 4, 1)
 
 def get_version():
     version = "%s.%s" % (VERSION[0], VERSION[1])
@@ -58,7 +58,7 @@ setup(
         'Pillow==2.0.0',
         'django-reredirects',
         'django-apptemplates==0.0.1',
-        'xlrd==0.9.2',
+        'jsonfield==0.9.19',
         'django-braces==1.2.2',
     ],
     classifiers=[
