@@ -154,6 +154,7 @@ class Thing(ThingAbstract):
     super_user_order = ('-published_at', '-created_at',)
 
     def __init__(self, *args, **kwargs):
+        if 'rebuild' in kwargs: kwargs.pop('rebuild')
         super(Thing, self).__init__(*args, **kwargs)
         if not self.id:
             self.id = str(uuid4())
@@ -275,6 +276,14 @@ class Thing(ThingAbstract):
         return val
 
     def save(self, *args, **kwargs):
+        # Handle preventing a rebuild on an import
+        rebuild = True
+        if 'rebuild' in kwargs:
+            rebuild = kwargs.pop('rebuild')
+        # Check if we are using get_or_create
+        if kwargs.get('using') == 'default' and kwargs.get('force_insert'):
+            rebuild = False
+
         if not self.content_type_id:
             self.content_type_id = self.content_type().pk
         try:
@@ -301,7 +310,7 @@ class Thing(ThingAbstract):
 
         super(Thing, self).save(*args, **kwargs)
 
-        if settings.USE_STATIC_SITE:
+        if settings.USE_STATIC_SITE and rebuild:
             subprocess.Popen(["python", "manage.py", "rebuild_static_site"])
 
     def attr_obj(self, key):

@@ -147,7 +147,7 @@ class ThingForm(forms.ModelForm):
 
             if 'editable' in f:
                 if not f['editable']:
-                    self.cleaned_data[key] = thing.get_val(f['key'])
+                    self.cleaned_data[key] = thing.get_val(f)
 
             if key in self.cleaned_data and self.cleaned_data[key]:
                 thing.values[key] = self.cleaned_data[key]

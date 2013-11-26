@@ -9,6 +9,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
+from django.conf import settings
 from django.shortcuts import get_object_or_404
 from django.core.urlresolvers import reverse, NoReverseMatch
 from django.utils import timezone
@@ -227,7 +228,7 @@ class ThingImportView(StaffuserRequiredMixin, FormView):
                     if k not in hard_keys:
                         item_json[k] = d[k]
                 item.json = item_json
-                item.save()
+                item.save(rebuild=False)
 
                 for field in model._meta.fields:
                     if field.name == "updated_at":
@@ -237,6 +238,9 @@ class ThingImportView(StaffuserRequiredMixin, FormView):
                 found_count = found_count + 1
 
         messages.success(self.request, 'Successfully imported to %s "%s". %s added, %s already found (not updated).' % (type_msg, model._meta.verbose_name_plural.lower(), add_count, found_count))
+
+        if settings.USE_STATIC_SITE:
+            subprocess.Popen(["python", "manage.py", "rebuild_static_site"])
 
         try:
             self.success_url = reverse("admin:%s_%s_changelist" % (model._meta.app_label, model._meta.verbose_name.lower()))
