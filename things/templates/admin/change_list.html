@@ -3,6 +3,9 @@
 {% load admin_urls %}
 
 {% block object-tools-items %}
+    {% if cl.model.thing_type_id %}
+    <li><a href="{% url 'admin:things_thingtype_change' cl.model.thing_type_id %}?next={{ request.path }}">Edit {{ cl.opts.verbose_name }} fields</a></li>
+    {% endif %}
     {% if cl.model.content_type.pk %}
     <li><a href="{% url 'things_import' %}?ct={{ cl.model.content_type.pk }}">Import {{ cl.opts.verbose_name_plural }}</a></li>
     <li><a href="{% url 'things_export' cl.model.content_type.pk %}">Export all {{ cl.opts.verbose_name_plural }}</a></li>

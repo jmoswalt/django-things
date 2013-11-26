@@ -10,6 +10,7 @@ from .feeds import AllThingsFeed, ThingSitemap
 
 admin.autodiscover()
 
+
 urlpatterns = patterns(
     '',
     url(r'^$', TemplateView.as_view(template_name='home.html'), name='home'),
@@ -26,10 +27,11 @@ urlpatterns = patterns(
 )
 
 def auto_app_url_patterns():
-    from .models import load_models
+    from .models import ThingType
     items = []
-    things = load_models()
-    for thing in things:
+    things = ThingType.objects.all()
+    for t in things:
+        thing = t.get_class()
         label = thing._meta.verbose_name.lower()
         label_p = thing._meta.verbose_name_plural.lower()
         listname = '%s_list' % label

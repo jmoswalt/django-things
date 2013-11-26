@@ -1,7 +1,7 @@
 {% load thing_tags %}
 
 <h2><a href="{{ object.get_absolute_url }}">{{ object.name }}</a></h2>
-
+<p><em>{{ object.published_at|date:"m/d/Y h:i a" }}</em></p>
 {% for attr in object.attrs %}
   <p class="clearfix">{{ attr.name }}: {{ object|val:attr.key|safe }}</p>
 {% endfor %}

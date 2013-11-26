@@ -18,7 +18,7 @@ from braces.views import StaffuserRequiredMixin
 from .utils import get_thing_object, get_thing_objects_qs
 from .forms import ThingImportForm
 from .models import ThingType, Thing
-from .types import TYPE_TEXT
+from .types import TYPE_TEXT, TYPE_LONGTEXT, TYPE_DATE, TYPE_BOOLEAN
 
 
 class ThingDetailView(DetailView):
@@ -106,6 +106,8 @@ def thing_export(request, ct_id):
             row['slug'] = t.slug
             row['created_at'] = t.created_at.strftime("%Y-%m-%d %H:%M:%S")
             row['updated_at'] = t.updated_at.strftime("%Y-%m-%d %H:%M:%S")
+            if t.published_at:
+                row['published_at'] = t.published_at.strftime("%Y-%m-%d %H:%M:%S")
             row['username'] = getattr(t.creator, 'username', '')
 
             for field in fields:
@@ -125,13 +127,8 @@ class ThingImportView(StaffuserRequiredMixin, FormView):
     template_name = 'admin/import.html'
     form_class = ThingImportForm
 
-    # def get_context_data(self, **kwargs):
-    #     context = super(ThingImportView, self).get_context_data(**kwargs)
-
-    #     return context
-
     def form_valid(self, form):
-        hard_keys = ['name', 'slug', 'created_at', 'updated_at', 'username']
+        hard_keys = ['name', 'slug', 'created_at', 'updated_at', 'published_at', 'username']
         add_count = 0
         found_count = 0
 
@@ -150,15 +147,26 @@ class ThingImportView(StaffuserRequiredMixin, FormView):
             new_type_fields = []
             for k in data[0].keys():
                 if k not in hard_keys:
+                    # Try to detect datatype
+                    if type(data[0][k]) == bool:
+                        datatype = TYPE_BOOLEAN
+                    elif len(data[0][k]) > 50:
+                        datatype = TYPE_LONGTEXT
+                    else:
+                        try:
+                            parse(data[0][k])
+                            datatype = TYPE_DATE
+                        except ValueError:
+                            datatype = TYPE_TEXT
+
                     new_type_fields.append({
-                        'name': k,
+                        'name': k.title(),
                         'key': slugify(k),
-                        'datatype': TYPE_TEXT
+                        'datatype': datatype
                     })
 
             new_type.json = {
                 'fields': new_type_fields,
-                'meta': {'verbose_name': new_type.name}
                 }
             new_type.save()
             model = new_type.get_class()
@@ -169,28 +177,50 @@ class ThingImportView(StaffuserRequiredMixin, FormView):
             new_item['content_type_id'] = model.content_type().pk
             new_item['slug'] = d.get('slug', slugify(new_item['name']))
 
+            # Check if slug exists for this model, so a match is found
+            # instead of adding it again
             try:
-                i = 0
-                exists = True
-                original_slug = new_item['slug']
-                while exists:
-                    if i == 0:
-                        slug = original_slug
-                    else:
-                        slug = original_slug + str(i)
-                    new_item['slug'] = slug
-                    exists = Thing.all_things.get(slug=slug)
-                    if exists:
-                        i = i + 1
-            except Thing.DoesNotExist:
-                pass
+                slug_exists = model.objects.get(slug=new_item['slug'])
+                if slug_exists:
+                    exists = True
+            except:
+                # Slug does not exist for this model. Check all models
+                # to see if this slug exists
+                try:
+                    i = 0
+                    exists = True
+                    original_slug = new_item['slug']
+                    while exists:
+                        if i == 0:
+                            slug = original_slug
+                        else:
+                            slug = original_slug + str(i)
+                        new_item['slug'] = slug
+                        exists = Thing.all_things.get(slug=slug)
+                        if exists:
+                            i = i + 1
+                except Thing.DoesNotExist:
+                    pass
 
             item, created = model.objects.get_or_create(**new_item)
             if created:
                 add_count = add_count + 1
                 item.creator = self.request.user
-                if 'created_at' in d: item.created_at = timezone.make_aware(parse(d['created_at']), timezone.utc)
-                if 'updated_at' in d: item.updated_at = timezone.make_aware(parse(d['updated_at']), timezone.utc)
+
+                for field in model._meta.fields:
+                    if field.name == "updated_at":
+                        field.auto_now = False
+
+                if 'created_at' in d:
+                    item.created_at = timezone.make_aware(parse(d['created_at']), timezone.utc)
+
+                if 'updated_at' in d:
+                    item.updated_at = timezone.make_aware(parse(d['updated_at']), timezone.utc)
+                else:
+                    item.updated_at = timezone.now()
+
+                if 'published_at' in d:
+                    item.published_at = timezone.make_aware(parse(d['published_at']), timezone.utc)
 
                 item_json = {}
                 for k in d.keys():
@@ -198,6 +228,11 @@ class ThingImportView(StaffuserRequiredMixin, FormView):
                         item_json[k] = d[k]
                 item.json = item_json
                 item.save()
+
+                for field in model._meta.fields:
+                    if field.name == "updated_at":
+                        field.auto_now = True
+
             else:
                 found_count = found_count + 1
 
@@ -207,6 +242,7 @@ class ThingImportView(StaffuserRequiredMixin, FormView):
             self.success_url = reverse("admin:%s_%s_changelist" % (model._meta.app_label, model._meta.verbose_name.lower()))
         except NoReverseMatch:
             pass
+
         return super(ThingImportView, self).form_valid(form)
 
     def get_success_url(self):

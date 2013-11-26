@@ -4,7 +4,6 @@ import subprocess
 from dateutil.parser import parse
 from jsonfield import JSONField
 
-from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse, NoReverseMatch
@@ -108,7 +107,6 @@ class ThingManager(models.Manager):
                             elif attr['datatype'] == TYPE_BOOLEAN:
                                 fieldtype = 'boolean'
                                 v = bool(v)
-
                     kw_compare = "="
                     if kw_filter in KWARG_MAP:
                         kw_compare = KWARG_MAP[kw_filter]
@@ -117,7 +115,7 @@ class ThingManager(models.Manager):
                 else:
                     # Include 'real' field kwargs in the normal way
                     # If it's one of the known fields
-                    if k in [f.name for f in self.model._meta.fields]:
+                    if kw in [f.name for f in self.model._meta.fields]:
                         new_kwargs[k] = v
 
         return thesuper.filter(*args, **new_kwargs)
@@ -130,25 +128,29 @@ class ThingAbstract(models.Model):
     name = models.CharField(max_length=200)
     slug = models.CharField(max_length=200, unique=True)
     json = JSONField(default={})
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField('Created', auto_now_add=True)
+    updated_at = models.DateTimeField('Updated', auto_now=True)
     creator = models.ForeignKey(User, null=True, blank=True)
 
     class Meta:
         abstract = True
 
 class Thing(ThingAbstract):
-    """A Thing is simply a name, slug, and an object type."""
+    """A Thing is simply a name, slug, published date, and an object type."""
 
     content_type_id = models.IntegerField()
+    published_at = models.DateTimeField('Published', null=True, blank=True)
 
     objects = ThingManager()
     all_things = AllThingsManager()
 
     # Default properties
-    public_filter_out = {}
-    public_order = '-created_at'
-    super_user_order = ('-created_at',)
+    public_filter_out = {
+        'published_at__gte': parse(ZERO_DATE),
+        'published_at__lte': timezone.now()
+        }
+    public_order = ('-published_at',)
+    super_user_order = ('-published_at', '-created_at',)
 
     def __init__(self, *args, **kwargs):
         super(Thing, self).__init__(*args, **kwargs)
@@ -324,6 +326,14 @@ class Thing(ThingAbstract):
             return None
         return self.default_order_field()
 
+    @classmethod
+    def thing_type_id(cls):
+        try:
+            tt = ThingType.objects.get(name=cls._meta.verbose_name)
+            return tt.pk
+        except:
+            return None
+
 
 class ThingType(ThingAbstract):
     """An expansion on a Content Type that includes field definitions."""
@@ -347,25 +357,17 @@ class ThingType(ThingAbstract):
             return "%s" % self.pk
 
     def get_class(self):
-        meta = {'verbose_name': str(self.name)}
+        meta = {'verbose_name': str(self.name), 'ordering': ('-published_at',)}
         return type(str(self.name), (Thing,), {
             '__module__': 'things.models',
             'Meta': ThingMeta(**meta),
-            'public_filter_out': {
-                'published_at__gte': 0,
-                'published_at__lte': timezone.now()
-                },
-            'super_user_order': ['-created_at', '-updated_at'],
-            'public_order': "-created_at",
         })
 
     def get_feed_class(self):
         from .feeds import ThingFeed
-        #meta = {'verbose_name': str(self.name)}
         return type(str(self.name), (ThingFeed,), {
             '__module__': 'things.feeds',
-            #'Meta': ThingMeta(**meta),
-            'item_pubdate': lambda x,y: y.get_val_from_key(y.public_order.replace('-', '')),
+            'item_pubdate': lambda x,y: y.published_at,
             'item_description': lambda x,y: getattr(y, 'content', y.name),
             'model': self.get_class()
         })
@@ -393,7 +395,11 @@ class ThingType(ThingAbstract):
         if self.detail_template:
             self.save_template('detail', 'detail_template')
 
-        load_models(msg="Saving a Thing Type")
+        load_models()
+
+        if settings.PROCESS_NAME != '':
+            os.system('sudo service %s reload' % settings.PROCESS_NAME)
+
 
 class ThingMeta(object):
     """

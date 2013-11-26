@@ -18,6 +18,8 @@ MANAGERS = ADMINS
 # Django 1.5 required setting
 ALLOWED_HOSTS = ['*']
 
+PROCESS_NAME = env('PROCESS_NAME', '')
+
 # -------------------------------------- #
 # DATABASES
 # -------------------------------------- #

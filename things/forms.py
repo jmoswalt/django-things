@@ -36,6 +36,9 @@ class ThingForm(forms.ModelForm):
 
         if "creator" in self.fields:
             del self.fields['creator']
+        # published_at field is re-added at the end to be last.
+        if 'published_at' in self.fields:
+            del self.fields['published_at']
 
         for f in self.instance.attrs:
 
@@ -100,6 +103,8 @@ class ThingForm(forms.ModelForm):
                 if f['datatype'] == TYPE_FOREIGNKEY:
                     attr = attr.pk
                 self.fields[key].initial = attr
+
+        self.fields['published_at'] = forms.DateTimeField(label="Published", widget=AdminSplitDateTime, required=False, help_text="This field controls both the order of the item and whether it's publicly viewable. If the publish date is in the future or not set, this item won't be viewable to logged out viewers")
 
     def clean_slug(self):
         slug = self.cleaned_data['slug']

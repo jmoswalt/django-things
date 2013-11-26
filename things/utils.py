@@ -5,7 +5,6 @@ from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
 from django.shortcuts import get_object_or_404
 from django.contrib import admin
-from django.core.urlresolvers import clear_url_caches
 
 
 def get_thing_object_or_404(cls, slug, **kwargs):
@@ -117,7 +116,5 @@ def load_models(msg=None):
             admin.site.register(new_class, ThingAdmin)
 
         new_classes.append(new_class)
-
-    clear_url_caches()
 
     return new_classes

@@ -7,7 +7,7 @@
 {% block content %}
 
   <h1>{{ object.name }}</h1>
-
+  <p><em>{{ object.published_at|date:"m/d/Y h:i a" }}</em></p>
   {% for attr in object.attrs %}
     <p>{{ attr.name }}: {{ object|val:attr.key|safe }}</p>
   {% endfor %}

@@ -103,11 +103,21 @@ class ThingTypeAdmin(admin.ModelAdmin):
         return link
     export_type.allow_tags = True
 
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        """
+        Update the change_view to respect the next querystring
+        """
+        result = super(ThingTypeAdmin, self).change_view(
+            request, object_id, form_url=form_url, extra_context=extra_context)
+        if not '_addanother' in request.POST and not '_continue' in request.POST and 'next' in request.GET:
+            result['Location'] = iri_to_uri("%s") % request.GET.get('next')
+        return result
+
 
 class ThingAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ['name']}
     search_fields = ['name', 'slug']
-    list_filter = ['updated_at', 'created_at']
+    list_filter = ['published_at', 'updated_at', 'created_at']
     list_per_page = 30
 
     def __init__(self, *args, **kwargs):
@@ -115,7 +125,7 @@ class ThingAdmin(admin.ModelAdmin):
 
         if self.list_display == ('__str__',):
             thing_fields = ['name', 'link']
-            self.list_display = thing_fields + self.model.attrs_list() + ['updated_at']
+            self.list_display = thing_fields + self.model.attrs_list() + ['published_at', 'updated_at']
 
         if self.form == ModelForm:
             self.form = ThingForm
