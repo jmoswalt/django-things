@@ -1,3 +1,5 @@
+from django.utils import timezone
+
 from things.models import Thing, register_thing
 from things import attrs, types
 from .utils import clear_snippet_cache
@@ -15,10 +17,13 @@ class Snippet(Thing):
         attrs.CONTENT,
     )
 
+    public_order_by = '-updated_at'
+
     class Meta:
         proxy = True
 
     def save(self, *args, **kwargs):
+        self.published_at = timezone.now()
         super(Snippet, self).save(*args, **kwargs)
         clear_snippet_cache(self)
 

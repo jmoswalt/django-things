@@ -139,7 +139,7 @@ class Thing(ThingAbstract):
     """A Thing is simply a name, slug, published date, and an object type."""
 
     content_type_id = models.IntegerField()
-    published_at = models.DateTimeField('Published', null=True, blank=True)
+    published_at = models.DateTimeField('Published', null=True, blank=True, default=timezone.now())
 
     objects = ThingManager()
     all_things = AllThingsManager()
@@ -149,7 +149,8 @@ class Thing(ThingAbstract):
         'published_at__gte': parse(ZERO_DATE),
         'published_at__lte': timezone.now()
         }
-    public_order = ('-published_at',)
+
+    public_order = '-published_at'
     super_user_order = ('-published_at', '-created_at',)
 
     def __init__(self, *args, **kwargs):
