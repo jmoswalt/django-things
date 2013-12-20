@@ -35,6 +35,7 @@ def update_project():
             os.path.join("conf", "settings.py"),
             os.path.join("conf", "urls.py"),
             os.path.join("conf", "wsgi.py"),
+            os.path.join("manage.py"),
         ]
         for file_path in files_to_copy:
             copy(os.path.join(package_path, "project_template", file_path),

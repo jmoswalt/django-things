@@ -1,14 +1,13 @@
 import dj_database_url
 import sys
-from os import environ, path, listdir
-from . import env
+import os
 
-PROJECT_ROOT = path.abspath(path.join(path.dirname(__file__), ".."))
-APPS_ROOT = path.join(PROJECT_ROOT, 'apps')
-sys.path.insert(0, APPS_ROOT)
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+APPS_ROOT = os.path.join(PROJECT_ROOT, 'apps')
+sys.os.path.insert(0, APPS_ROOT)
 
 # Debug option which is useful when working locally.
-DEBUG = env('DEBUG', False)
+DEBUG = os.getenv('DEBUG', False)
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = ()
@@ -18,34 +17,35 @@ MANAGERS = ADMINS
 # Django 1.5 required setting
 ALLOWED_HOSTS = ['*']
 
-PROCESS_NAME = env('PROCESS_NAME', '')
+PROCESS_NAME = os.getenv('PROCESS_NAME', '')
+SERVER_NAME = os.getenv('SERVER_NAME', 'http://example.com')
 
 # -------------------------------------- #
 # DATABASES
 # -------------------------------------- #
 
-DATABASES = env('DATABASES', {'default': dj_database_url.config(default='postgres://localhost/django_things')})
+DATABASES = os.getenv('DATABASES', {'default': dj_database_url.config(default='postgres://localhost/django_things')})
 
 DATABASES['default']['OPTIONS'] = {'autocommit': True}
 
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = env('SECRET_KEY', 'bbj1#c30g@qm!=xhpcfk$!^dq#1@s#mr0!f@$cz2e*^1tuskr7')
+SECRET_KEY = os.getenv('SECRET_KEY', 'bbj1#c30g@qm!=xhpcfk$!^dq#1@s#mr0!f@$cz2e*^1tuskr7')
 
 
 # -------------------------------------- #
 # THEME
 # -------------------------------------- #
 
-THEME = env('THEME', 'default_theme')
-THEME_PATH = path.join(PROJECT_ROOT, 'themes', THEME)
+THEME = os.getenv('THEME', 'default_theme')
+THEME_PATH = os.path.join(PROJECT_ROOT, 'themes', THEME)
 
 TEMPLATE_DIRS = (
-    path.join(THEME_PATH, 'templates'),
+    os.path.join(THEME_PATH, 'templates'),
 )
 
 STATICFILES_DIRS = (
-    path.join(THEME_PATH, 'static'),
+    os.path.join(THEME_PATH, 'static'),
 )
 
 
@@ -74,7 +74,7 @@ USE_TZ = True
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/media/"
-MEDIA_ROOT = path.join(PROJECT_ROOT, 'media')
+MEDIA_ROOT = os.path.join(PROJECT_ROOT, 'media')
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
@@ -85,7 +85,7 @@ MEDIA_URL = '/media/'
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
-STATIC_ROOT = path.join(PROJECT_ROOT, 'static')
+STATIC_ROOT = os.path.join(PROJECT_ROOT, 'static')
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
@@ -165,8 +165,8 @@ INSTALLED_APPS = (
 THINGS_APPS = ()
 
 # Load apps from local "apps" folder in project
-if path.exists(APPS_ROOT):
-    THINGS_APPS += tuple(app for app in listdir(APPS_ROOT))
+if os.path.exists(APPS_ROOT):
+    THINGS_APPS += tuple(app for app in os.listdir(APPS_ROOT))
 
     INSTALLED_APPS += THINGS_APPS
 
@@ -177,15 +177,15 @@ if path.exists(APPS_ROOT):
 
 AWS_PRELOAD_METADATA = True
 
-AWS_ACCESS_KEY = env('AWS_ACCESS_KEY', '')
+AWS_ACCESS_KEY = os.getenv('AWS_ACCESS_KEY', '')
 AWS_ACCESS_KEY_ID = AWS_ACCESS_KEY
-AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY', '')
-AWS_STORAGE_BUCKET_NAME = env('AWS_STORAGE_BUCKET_NAME', '')
+AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY', '')
+AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME', '')
 STATIC_S3_PATH = "static"
 FULL_STATIC_SITE = False
-USE_STATIC_SITE = env('USE_STATIC_SITE', False)
+USE_STATIC_SITE = os.getenv('USE_STATIC_SITE', False)
 if USE_STATIC_SITE:
-    FULL_STATIC_SITE = env('FULL_STATIC_SITE', False)
+    FULL_STATIC_SITE = os.getenv('FULL_STATIC_SITE', False)
 
 
 # -------------------------------------- #
@@ -202,17 +202,17 @@ if all([AWS_ACCESS_KEY,
     STATICFILES_STORAGE = 'things.s3_storages.StaticStorage'
 else:
     MEDUSA_RENDERER_CLASS = "django_medusa.renderers.DiskStaticSiteRenderer"
-    MEDUSA_DEPLOY_DIR = path.join(PROJECT_ROOT, 'html')
+    MEDUSA_DEPLOY_DIR = os.path.join(PROJECT_ROOT, 'html')
 
 
 # -------------------------------------- #
 # DEBUG OPTIONS
 # -------------------------------------- #
 
-if env('SENTRY_DSN', None):
+if os.getenv('SENTRY_DSN', None):
     INSTALLED_APPS += ('raven.contrib.django',)
 
-if env('DEBUG_TOOLBAR'):
+if os.getenv('DEBUG_TOOLBAR'):
     if 'debug_toolbar' not in INSTALLED_APPS:
         INSTALLED_APPS += ('debug_toolbar',)
 
@@ -228,8 +228,8 @@ if env('DEBUG_TOOLBAR'):
 # CACHE
 # -------------------------------------- #
 
-SITE_CACHE_KEY = env('SITE_CACHE_KEY', SECRET_KEY)
-CACHE_PRE_KEY = env('CACHE_PRE_KEY', SITE_CACHE_KEY)
+SITE_CACHE_KEY = os.getenv('SITE_CACHE_KEY', SECRET_KEY)
+CACHE_PRE_KEY = os.getenv('CACHE_PRE_KEY', SITE_CACHE_KEY)
 JOHNNY_MIDDLEWARE_KEY_PREFIX = CACHE_PRE_KEY
 
 # Dummy Cache is the initial default caching used
@@ -243,7 +243,7 @@ CACHES = {
 # Local memcached requires memcached to be running locally.
 # Requires adding the following packages to requirements.txt:
 # python-memcached==1.48
-LOCAL_MEMCACHED_URL = env('LOCAL_MEMCACHED_URL')
+LOCAL_MEMCACHED_URL = os.getenv('LOCAL_MEMCACHED_URL')
 if LOCAL_MEMCACHED_URL:
     CACHES = {
         'default': {
@@ -257,7 +257,7 @@ if LOCAL_MEMCACHED_URL:
 # Requires adding the following packages to requirements.txt:
 # pylibmc==1.2.2
 # django-pylibmc-sasl==0.2.4
-MEMCACHE_SERVERS = env('MEMCACHE_SERVERS')
+MEMCACHE_SERVERS = os.getenv('MEMCACHE_SERVERS')
 
 if MEMCACHE_SERVERS:
     CACHES = {
@@ -271,18 +271,18 @@ if MEMCACHE_SERVERS:
 # Requires adding the following packages to requirements.txt:
 # pylibmc==1.2.2
 # django-pylibmc-sasl==0.2.4
-MEMCACHIER_SERVERS = env('MEMCACHIER_SERVERS')
-MEMCACHIER_USERNAME = env('MEMCACHIER_USERNAME')
-MEMCACHIER_PASSWORD = env('MEMCACHIER_PASSWORD')
+MEMCACHIER_SERVERS = os.getenv('MEMCACHIER_SERVERS')
+MEMCACHIER_USERNAME = os.getenv('MEMCACHIER_USERNAME')
+MEMCACHIER_PASSWORD = os.getenv('MEMCACHIER_PASSWORD')
 
 USE_MEMCACHIER = all([MEMCACHIER_SERVERS,
                       MEMCACHIER_USERNAME,
                       MEMCACHIER_PASSWORD])
 
 if USE_MEMCACHIER:
-    environ['MEMCACHE_SERVERS'] = MEMCACHIER_SERVERS
-    environ['MEMCACHE_USERNAME'] = MEMCACHIER_USERNAME
-    environ['MEMCACHE_PASSWORD'] = MEMCACHIER_PASSWORD
+    os.environ['MEMCACHE_SERVERS'] = MEMCACHIER_SERVERS
+    os.environ['MEMCACHE_USERNAME'] = MEMCACHIER_USERNAME
+    os.environ['MEMCACHE_PASSWORD'] = MEMCACHIER_PASSWORD
 
     CACHES = {
         'default': {
@@ -300,18 +300,18 @@ CACHES['default']['JOHNNY_CACHE'] = True
 # EMAIL
 # -------------------------------------- #
 
-EMAIL_USE_TLS = env('EMAIL_USE_TLS', True)
-EMAIL_HOST = env('EMAIL_HOST')
-EMAIL_PORT = env('EMAIL_PORT')
-EMAIL_HOST_USER = env('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', True)
+EMAIL_HOST = os.getenv('EMAIL_HOST')
+EMAIL_PORT = os.getenv('EMAIL_PORT')
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 
-EMAIL_BACKEND = env('EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
+EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
 
 # HEROKU ADDON - SENDGRID
 # https://addons.heroku.com/sendgrid
-SENDGRID_USERNAME = env('SENDGRID_USERNAME')
-SENDGRID_PASSWORD = env('SENDGRID_PASSWORD')
+SENDGRID_USERNAME = os.getenv('SENDGRID_USERNAME')
+SENDGRID_PASSWORD = os.getenv('SENDGRID_PASSWORD')
 
 USE_SENDGRID = all([SENDGRID_USERNAME, SENDGRID_PASSWORD])
 
@@ -324,10 +324,10 @@ if USE_SENDGRID:
 
 # HEROKU ADDON - MAILGUN
 # https://addons.heroku.com/mailgun
-MAILGUN_SMTP_SERVER = env('MAILGUN_SMTP_SERVER')
-MAILGUN_SMTP_LOGIN = env('MAILGUN_SMTP_LOGIN')
-MAILGUN_SMTP_PASSWORD = env('MAILGUN_SMTP_PASSWORD')
-MAILGUN_SMTP_PORT = env('MAILGUN_SMTP_PORT')
+MAILGUN_SMTP_SERVER = os.getenv('MAILGUN_SMTP_SERVER')
+MAILGUN_SMTP_LOGIN = os.getenv('MAILGUN_SMTP_LOGIN')
+MAILGUN_SMTP_PASSWORD = os.getenv('MAILGUN_SMTP_PASSWORD')
+MAILGUN_SMTP_PORT = os.getenv('MAILGUN_SMTP_PORT')
 
 USE_MAILGUN = all([MAILGUN_SMTP_SERVER,
                    MAILGUN_SMTP_LOGIN,
@@ -342,8 +342,8 @@ if USE_MAILGUN:
     EMAIL_PORT = MAILGUN_SMTP_PORT
 
 
-DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER)
-SERVER_EMAIL = env('SERVER_EMAIL', DEFAULT_FROM_EMAIL)
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER)
+SERVER_EMAIL = os.getenv('SERVER_EMAIL', DEFAULT_FROM_EMAIL)
 
 
 # A sample logging configuration. The only tangible logging
