@@ -4,7 +4,7 @@ import os
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 APPS_ROOT = os.path.join(PROJECT_ROOT, 'apps')
-sys.os.path.insert(0, APPS_ROOT)
+sys.path.insert(0, APPS_ROOT)
 
 # Debug option which is useful when working locally.
 DEBUG = os.getenv('DEBUG', False)
