@@ -205,7 +205,7 @@ class Thing(ThingAbstract):
     def admin_url(cls):
         ct = cls.content_type()
         try:
-            return reverse("admin:%s_%s_changelist" % (ct.app_label, ct.name))
+            return reverse("admin:%s_%s_changelist" % (ct.app_label, ct.name.lower()))
         except NoReverseMatch:
             return ''
 
@@ -219,7 +219,7 @@ class Thing(ThingAbstract):
     @models.permalink
     def get_edit_url(self):
         ct = self.obj_content_type()
-        return ("admin:%s_%s_change" % (ct.app_label, ct.name), [self.pk])
+        return ("admin:%s_%s_change" % (ct.app_label, ct.name.lower()), [self.pk])
 
     def get_val_from_key(self, key):
         for attr in self.attrs:

@@ -49,3 +49,15 @@ a.edit-link {
 .edit-parent {
     position: relative;
 }
+
+.message-item {
+    display: block;
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    background-color: rgba(80, 180, 220, .7);
+    color: #fff;
+    z-index: 100;
+    padding: 16px 40px;
+    border-radius: 4px;
+}
