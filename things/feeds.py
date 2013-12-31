@@ -52,10 +52,11 @@ class AllThingsFeed(Feed):
                     val = timezone.make_aware(self.item_pubdate(item), timezone.utc)
                 else:
                     val = self.item_pubdate(item)
-                self.all_items.append((item, val))
-                item_per_feed_cnt += 1
-                if item_per_feed_cnt >= 20:
-                    break
+                if (item, val) not in self.all_items:
+                    self.all_items.append((item, val))
+                    item_per_feed_cnt += 1
+                    if item_per_feed_cnt >= 20:
+                        break
 
     def items(self):
         self.load_feeds_items()
