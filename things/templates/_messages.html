@@ -3,7 +3,7 @@
   {% for message in messages %}
   <div class="message-item">
     <div class="alert fade in{% if message.tags %} alert-{{ message.tags }}{% endif %}" data-alert="alert">
-      <p>{{ message|safe }}</p>
+      <span>{{ message|safe }}</span>
     </div>
   </div>
   {% endfor %}
