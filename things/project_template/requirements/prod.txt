@@ -1,6 +1,6 @@
 -r common.txt
 
-gunicorn==0.17.2
+gunicorn==19.5.0
 gevent==0.13.8
 
 raven==3.2.1
