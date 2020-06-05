@@ -48,7 +48,7 @@ setup(
         "https://github.com/mtigas/django-medusa/tarball/master#egg=django_medusa-0.1.0",
     ],
     install_requires=[
-        'Django==1.5.4',
+        'Django==1.11.29',
         'python-dateutil==2.1',
         'django-medusa',
         'django-wysiwyg-redactor==0.3.1',
