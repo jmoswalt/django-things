@@ -55,7 +55,7 @@ setup(
         'django-storages==1.1.5',
         'boto==2.6.0',
         'Markdown==2.3.1',
-        'Pillow==6.2.0',
+        'Pillow==8.1.1',
         'django-reredirects',
         'django-apptemplates==0.0.1',
         'jsonfield==0.9.19',
